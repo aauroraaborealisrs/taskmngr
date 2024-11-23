@@ -5,9 +5,9 @@ import axios from 'axios';
 const DashBoard = () => {
   const [tasks, setTasks] = useState<any[]>([]);
 
-  useEffect(() => {
-    axios.get('http://localhost:5000/tasks').then((res) => setTasks(res.data));
-  }, []);
+  // useEffect(() => {
+  //   axios.get('http://localhost:5000/tasks').then((res) => setTasks(res.data));
+  // }, []);
 
   const onDragEnd = (result: any) => {
     const { destination, source } = result;
