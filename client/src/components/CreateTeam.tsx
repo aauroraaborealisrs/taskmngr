@@ -46,7 +46,7 @@ const CreateTeam: React.FC = () => {
 
   // Фильтрация пользователей по поисковому запросу
   const filteredUsers = users.filter((user) =>
-    user.username.toLowerCase().includes(search.toLowerCase())
+    user.username.toLowerCase().includes(search.toLowerCase()),
   );
 
   // Добавление пользователя в выбранных участников

@@ -1,13 +1,15 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import '../styles/Login.css'; 
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import "../styles/Login.css";
+import { useNavigate } from "react-router-dom";
 
 const loginSchema = z.object({
-  email: z.string().email({ message: 'Invalid email address' }),
-  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters" }),
 });
 
 type LoginFormInputs = z.infer<typeof loginSchema>;
@@ -29,10 +31,10 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      const response = await fetch('http://localhost:5000/auth/login', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
       });
@@ -40,18 +42,18 @@ const Login: React.FC = () => {
       if (response.ok) {
         const result = await response.json();
         // Сохраняем токен и данные пользователя в Local Storage
-        saveToLocalStorage('token', result.token);
-        saveToLocalStorage('user', result.user);
+        saveToLocalStorage("token", result.token);
+        saveToLocalStorage("user", result.user);
 
-        alert('Login successful!');
-        navigate('/dashboard'); // Перенаправление на Dashboard
+        alert("Login successful!");
+        navigate("/dashboard"); // Перенаправление на Dashboard
       } else {
         const error = await response.json();
         alert(`Login failed: ${error.message}`);
       }
     } catch (err) {
-      console.error('Error during login:', err);
-      alert('An error occurred. Please try again later.');
+      console.error("Error during login:", err);
+      alert("An error occurred. Please try again later.");
     }
   };
 
@@ -60,24 +62,32 @@ const Login: React.FC = () => {
       <h1 className="login-title">Login</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="form-group">
-          <label htmlFor="email" className="form-label">Email</label>
+          <label htmlFor="email" className="form-label">
+            Email
+          </label>
           <input
             id="email"
             type="email"
-            {...register('email')}
+            {...register("email")}
             className="form-input"
           />
-          {errors.email && <p className="error-message">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="error-message">{errors.email.message}</p>
+          )}
         </div>
         <div className="form-group">
-          <label htmlFor="password" className="form-label">Password</label>
+          <label htmlFor="password" className="form-label">
+            Password
+          </label>
           <input
             id="password"
             type="password"
-            {...register('password')}
+            {...register("password")}
             className="form-input"
           />
-          {errors.password && <p className="error-message">{errors.password.message}</p>}
+          {errors.password && (
+            <p className="error-message">{errors.password.message}</p>
+          )}
         </div>
         <button type="submit" className="submit-button">
           Login

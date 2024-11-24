@@ -1,7 +1,7 @@
-import express, { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import pool from './db.js';
-import { authenticateToken } from './authMiddleware.js';
+import express, { Request, Response } from "express";
+import bcrypt from "bcryptjs";
+import pool from "./db.js";
+import { authenticateToken } from "./authMiddleware.js";
 
 const router = express.Router();
 
@@ -16,7 +16,7 @@ interface UpdateAccountRequestBody {
 
 // Роут для обновления данных пользователя
 router.put(
-  '/me',
+  "/me",
   authenticateToken, // Проверяем токен перед выполнением запроса
   async (req: Request, res: Response) => {
     const { username, email, first_name, last_name, password, avatar_url } =
@@ -25,11 +25,11 @@ router.put(
 
     try {
       // Проверяем, существует ли пользователь
-      const userCheck = await pool.query('SELECT * FROM users WHERE id = $1', [
+      const userCheck = await pool.query("SELECT * FROM users WHERE id = $1", [
         userId,
       ]);
       if (userCheck.rows.length === 0) {
-        return res.status(404).json({ message: 'User not found' });
+        return res.status(404).json({ message: "User not found" });
       }
 
       // Хэшируем пароль, если его обновляют
@@ -69,12 +69,12 @@ router.put(
 
       // Если нет изменений
       if (updates.length === 0) {
-        return res.status(400).json({ message: 'No fields to update' });
+        return res.status(400).json({ message: "No fields to update" });
       }
 
       const query = `
         UPDATE users
-        SET ${updates.join(', ')}
+        SET ${updates.join(", ")}
         WHERE id = $1
         RETURNING id, username, email, first_name, last_name, avatar_url;
       `;
@@ -82,32 +82,34 @@ router.put(
       const updatedUser = await pool.query(query, values);
 
       res.status(200).json({
-        message: 'Account updated successfully',
+        message: "Account updated successfully",
         user: updatedUser.rows[0],
       });
     } catch (error: unknown) {
-      console.error('Error updating user:', error);
-      res.status(500).json({ message: 'Server error' });
+      console.error("Error updating user:", error);
+      res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
 
-router.get('/me', authenticateToken, async (req: Request, res: Response) => {
+router.get("/me", authenticateToken, async (req: Request, res: Response) => {
   const userId = req.body.userId; // ID пользователя из middleware
 
   try {
-    const user = await pool.query('SELECT id, username, email, first_name, last_name, avatar_url FROM users WHERE id = $1', [userId]);
+    const user = await pool.query(
+      "SELECT id, username, email, first_name, last_name, avatar_url FROM users WHERE id = $1",
+      [userId],
+    );
 
     if (user.rows.length === 0) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.status(200).json(user.rows[0]);
   } catch (err) {
-    console.error('Error fetching user data:', err);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error fetching user data:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
-
 
 export default router;

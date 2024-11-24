@@ -1,7 +1,7 @@
-import jwt from 'jsonwebtoken';
-import { Request, Response, NextFunction } from 'express';
+import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
 
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
+const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
 
 interface DecodedToken {
   id: string; // ID пользователя, который мы добавляем в токен при входе
@@ -10,18 +10,18 @@ interface DecodedToken {
 export const authenticateToken = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const authHeader = req.headers.authorization; // Извлекаем заголовок Authorization
   console.log("Authorization header received:", authHeader);
 
   // Извлекаем токен из заголовка
-  const token = authHeader && authHeader.split(' ')[1];
+  const token = authHeader && authHeader.split(" ")[1];
   console.log("Extracted token:", token);
 
   if (!token) {
     console.error("No token provided");
-    return res.status(401).json({ message: 'Authorization token is required' });
+    return res.status(401).json({ message: "Authorization token is required" });
   }
 
   try {
@@ -39,6 +39,6 @@ export const authenticateToken = (
     console.error("Token causing error:", token);
     console.error("Error message:", (err as Error).message);
 
-    return res.status(403).json({ message: 'Invalid or expired token' });
+    return res.status(403).json({ message: "Invalid or expired token" });
   }
 };

@@ -22,7 +22,7 @@ router.post("/", authenticateToken, async (req: Request, res: Response) => {
       `INSERT INTO teams (name, owner_id) 
        VALUES ($1, $2) 
        RETURNING id, name, owner_id, created_at`,
-      [name, userId]
+      [name, userId],
     );
 
     const teamId = newTeam.rows[0].id;
@@ -31,7 +31,7 @@ router.post("/", authenticateToken, async (req: Request, res: Response) => {
     await pool.query(
       `INSERT INTO team_members (team_id, user_id, role) 
        VALUES ($1, $2, 'owner')`,
-      [teamId, userId]
+      [teamId, userId],
     );
 
     res
@@ -62,7 +62,7 @@ router.post("/:teamId/members", authenticateToken, async (req, res) => {
     // Проверяем, существует ли текущий пользователь
     const currentUserCheck = await pool.query(
       "SELECT * FROM users WHERE id = $1",
-      [currentUserId]
+      [currentUserId],
     );
     if (currentUserCheck.rows.length === 0) {
       return res.status(404).json({ message: "Current user not found" });
@@ -71,7 +71,7 @@ router.post("/:teamId/members", authenticateToken, async (req, res) => {
     // Проверяем, существует ли пользователь, которого добавляем
     const userToAddCheck = await pool.query(
       "SELECT * FROM users WHERE id = $1",
-      [addUserId]
+      [addUserId],
     );
     if (userToAddCheck.rows.length === 0) {
       return res.status(404).json({ message: "User to add not found" });
@@ -80,7 +80,7 @@ router.post("/:teamId/members", authenticateToken, async (req, res) => {
     // Проверяем, является ли пользователь уже членом команды
     const memberCheck = await pool.query(
       "SELECT * FROM team_members WHERE team_id = $1 AND user_id = $2",
-      [teamId, addUserId]
+      [teamId, addUserId],
     );
     if (memberCheck.rows.length > 0) {
       return res
@@ -91,7 +91,7 @@ router.post("/:teamId/members", authenticateToken, async (req, res) => {
     // Добавляем пользователя в команду
     const newMember = await pool.query(
       `INSERT INTO team_members (team_id, user_id, role) VALUES ($1, $2, $3) RETURNING *`,
-      [teamId, addUserId, role || "member"]
+      [teamId, addUserId, role || "member"],
     );
 
     console.log(`User ${addUserId} added to team ${teamId} as ${role}`);
@@ -117,7 +117,7 @@ router.get(
          FROM team_members 
          JOIN users ON team_members.user_id = users.id 
          WHERE team_members.team_id = $1`,
-        [teamId]
+        [teamId],
       );
 
       res.status(200).json({ members: members.rows });
@@ -125,7 +125,7 @@ router.get(
       console.error("Error fetching team members:", error);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
 );
 
 // Роут для получения всех команд пользователя

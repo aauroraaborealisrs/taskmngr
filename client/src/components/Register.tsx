@@ -42,7 +42,7 @@ const Register: React.FC = () => {
         first_name: data.firstName,
         last_name: data.lastName,
       };
-  
+
       const response = await fetch("http://localhost:5000/auth/register", {
         method: "POST",
         headers: {
@@ -50,7 +50,7 @@ const Register: React.FC = () => {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (response.ok) {
         const result = await response.json();
         console.log(result);
@@ -67,7 +67,7 @@ const Register: React.FC = () => {
       alert("An error occurred. Please try again later.");
     }
   };
-  
+
   return (
     <div className="register-container">
       <h1 className="register-title">Register</h1>

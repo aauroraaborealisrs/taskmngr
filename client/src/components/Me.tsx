@@ -34,8 +34,8 @@ const Me: React.FC = () => {
       try {
         // const token = localStorage.getItem("token");
         // console.log(token);
-        const rawToken = localStorage.getItem('token');
-        const token = rawToken?.replace(/^"|"$/g, ''); 
+        const rawToken = localStorage.getItem("token");
+        const token = rawToken?.replace(/^"|"$/g, "");
         const response = await fetch("http://localhost:5000/update/me", {
           method: "GET",
           headers: {
@@ -66,8 +66,8 @@ const Me: React.FC = () => {
 
   const onSubmit = async (data: UpdateFormInputs) => {
     try {
-      const rawToken = localStorage.getItem('token');
-      const token = rawToken?.replace(/^"|"$/g, ''); 
+      const rawToken = localStorage.getItem("token");
+      const token = rawToken?.replace(/^"|"$/g, "");
       const response = await fetch("http://localhost:5000/update/me", {
         method: "PUT",
         headers: {
@@ -113,7 +113,9 @@ const Me: React.FC = () => {
             {...register("username")}
             className="form-input"
           />
-          {errors.username && <p className="error-message">{errors.username.message}</p>}
+          {errors.username && (
+            <p className="error-message">{errors.username.message}</p>
+          )}
         </div>
         <div className="form-group">
           <label htmlFor="email" className="form-label">
@@ -125,7 +127,9 @@ const Me: React.FC = () => {
             {...register("email")}
             className="form-input"
           />
-          {errors.email && <p className="error-message">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="error-message">{errors.email.message}</p>
+          )}
         </div>
         <div className="form-group">
           <label htmlFor="first_name" className="form-label">
