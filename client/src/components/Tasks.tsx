@@ -1,80 +1,3 @@
-// import React, { useState, useEffect } from "react";
-// import "../styles/Tasks.css";
-
-// interface Task {
-//   id: number;
-//   title: string;
-//   description: string;
-//   priority: string;
-//   status: string;
-//   assigned_to: string | null;
-//   due_date: string | null;
-// }
-
-// const Tasks: React.FC = () => {
-//   const [tasks, setTasks] = useState<Task[]>([]);
-//   const [loading, setLoading] = useState<boolean>(true);
-//   const [error, setError] = useState<string | null>(null);
-
-//   const fetchTasks = async () => {
-//     const rawToken = localStorage.getItem("token");
-//     const token = rawToken?.replace(/^"|"$/g, ""); // Убираем кавычки из токена
-
-//     try {
-//       const response = await fetch("http://localhost:5000/tasks/2/tasks", {
-//         method: "GET",
-//         headers: {
-//           Authorization: `Bearer ${token}`,
-//         },
-//       });
-
-//       if (response.ok) {
-//         const data = await response.json();
-//         setTasks(data.tasks);
-//       } else {
-//         throw new Error("Failed to fetch tasks");
-//       }
-//     } catch (err) {
-//       setError("Failed to load tasks. Please try again.");
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchTasks();
-//   }, []);
-
-//   if (loading) return <p>Loading tasks...</p>;
-//   if (error) return <p className="error-message">{error}</p>;
-
-//   return (
-//     <div className="tasks-container">
-//       <h1 className="tasks-title">Tasks</h1>
-//       {tasks.length === 0 ? (
-//         <p>No tasks available for this team.</p>
-//       ) : (
-//         <ul className="tasks-list">
-//           {tasks.map((task) => (
-//             <li key={task.id} className="task-item">
-//               <h3>{task.title}</h3>
-//               <p>{task.description}</p>
-//               <p>Priority: {task.priority}</p>
-//               <p>Status: {task.status}</p>
-//               {task.assigned_to && <p>Assigned to: {task.assigned_to}</p>}
-//               {task.due_date && <p>Due Date: {new Date(task.due_date).toLocaleDateString()}</p>}
-//             </li>
-//           ))}
-//         </ul>
-//       )}
-//     </div>
-//   );
-// };
-
-// export default Tasks;
-
-
-
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/Tasks.css";
@@ -85,29 +8,57 @@ interface Task {
   description: string;
   priority: string;
   status: string;
+  creator: { name: string; avatar: string }; // Обновлено для имени и аватарки
+  assigned_to: number | null;
+  due_date: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [sortField, setSortField] = useState<keyof Task>("title"); // Поле для сортировки
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // Порядок сортировки
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
 
-  // Function to fetch tasks
-  const fetchTasks = async (teamId: string) => {
+  // Function to fetch tasks with mapping
+  const fetchTasks = async (teamId: string, sortField: keyof Task, sortOrder: "asc" | "desc") => {
     const rawToken = localStorage.getItem("token");
-    const token = rawToken?.replace(/^"|"$/g, ""); // Remove quotes from the token
+    const token = rawToken?.replace(/^"|"$/g, ""); // Убираем кавычки
 
     try {
-      const response = await fetch(`http://localhost:5000/tasks/${teamId}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `http://localhost:5000/tasks?teamId=${teamId}&sortField=${sortField}&sortOrder=${sortOrder}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
-        setTasks(data.tasks || []);
+
+        // Преобразуем данные в ожидаемый формат
+        const mappedTasks = data.tasks.map((task: any) => ({
+          id: task.id,
+          title: task.title,
+          description: task.description,
+          priority: task.priority,
+          status: task.status,
+          creator: {
+            name: `${task.creator_first_name} ${task.creator_last_name}`,
+            avatar: task.creator_avatar_url,
+          },
+          assigned_to: task.assigned_to,
+          due_date: task.due_date,
+          created_at: task.created_at,
+          updated_at: task.updated_at,
+        }));
+
+        setTasks(mappedTasks);
       } else {
         throw new Error("Failed to fetch tasks");
       }
@@ -116,31 +67,70 @@ const Tasks: React.FC = () => {
     }
   };
 
-  // Effect to handle redirection based on localStorage
+  // Effect to handle redirection and fetching tasks
   useEffect(() => {
     const selectedTeamId = localStorage.getItem("selectedTeamId");
 
-    // Redirect to the correct team route if not already there
     if (!teamId && selectedTeamId) {
       navigate(`/tasks/${selectedTeamId}`);
     } else if (teamId) {
-      fetchTasks(teamId);
+      fetchTasks(teamId, sortField, sortOrder); // Передаем параметры сортировки
     }
-  }, [teamId, navigate]);
+  }, [teamId, sortField, sortOrder, navigate]);
+
+  // Function to sort tasks
+  const sortTasks = (field: keyof Task) => {
+    const order = sortOrder === "asc" ? "desc" : "asc";
+    setSortField(field);
+    setSortOrder(order);
+  };
 
   return (
     <div className="tasks-container">
       <h1>Tasks for Team: {teamId}</h1>
-      <ul className="task-list">
-        {tasks.map((task) => (
-          <li key={task.id} className="task-item">
-            <h3>{task.title}</h3>
-            <p>{task.description}</p>
-            <p>Status: {task.status}</p>
-            <p>Priority: {task.priority}</p>
-          </li>
-        ))}
-      </ul>
+      {tasks.length === 0 ? (
+        <p>No tasks available for this team.</p>
+      ) : (
+        <table className="tasks-table">
+          <thead>
+            <tr>
+              <th onClick={() => sortTasks("title")}>
+                Title {sortField === "title" && (sortOrder === "asc" ? "↑" : "↓")}
+              </th>
+              <th>Description</th>
+              <th onClick={() => sortTasks("priority")}>
+                Priority {sortField === "priority" && (sortOrder === "asc" ? "↑" : "↓")}
+              </th>
+              <th onClick={() => sortTasks("status")}>
+                Status {sortField === "status" && (sortOrder === "asc" ? "↑" : "↓")}
+              </th>
+              <th>Creator</th>
+              <th>Assigned To</th>
+              <th onClick={() => sortTasks("due_date")}>
+                Due Date {sortField === "due_date" && (sortOrder === "asc" ? "↑" : "↓")}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {tasks.map((task) => (
+              <tr key={task.id}>
+                <td>{task.title}</td>
+                <td>{task.description}</td>
+                <td>{task.priority}</td>
+                <td>{task.status}</td>
+                <td>
+                  <div className="creator-info">
+                    <img src={task.creator.avatar} alt={task.creator.name} className="creator-avatar" />
+                    <span>{task.creator.name}</span>
+                  </div>
+                </td>
+                <td>{task.assigned_to || "Unassigned"}</td>
+                <td>{task.due_date ? new Date(task.due_date).toLocaleDateString() : "No deadline"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </div>
   );
 };

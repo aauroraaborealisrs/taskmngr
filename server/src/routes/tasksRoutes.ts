@@ -177,6 +177,47 @@ router.get('/:teamId/tasks', authenticateToken, async (req: Request, res: Respon
       res.status(500).json({ message: 'Server error' });
     }
   });
+
+  router.get('/', authenticateToken, async (req, res) => {
+    const { teamId, sortField = 'created_at', sortOrder = 'asc' } = req.query;
+  
+    if (!teamId) {
+      return res.status(400).json({ message: "Team ID is required" });
+    }
+  
+    try {
+      // Генерируем SQL-запрос с учетом сортировки
+      const query = `
+        SELECT 
+          tasks.id,
+          tasks.title,
+          tasks.description,
+          tasks.priority,
+          tasks.status,
+          tasks.due_date,
+          tasks.created_at,
+          tasks.updated_at,
+          users.first_name AS creator_first_name,
+          users.last_name AS creator_last_name,
+          users.avatar_url AS creator_avatar_url
+        FROM 
+          tasks
+        LEFT JOIN 
+          users ON tasks.creator_id = users.id
+        WHERE 
+          tasks.team_id = $1
+        ORDER BY 
+          ${sortField} ${sortOrder === 'desc' ? 'DESC' : 'ASC'}
+      `;
+  
+      const tasks = await pool.query(query, [teamId]);
+      res.json({ tasks: tasks.rows });
+    } catch (error) {
+      console.error('Error fetching tasks:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+  
   
   
 

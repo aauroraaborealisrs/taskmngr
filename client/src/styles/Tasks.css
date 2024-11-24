@@ -34,3 +34,45 @@
     font-weight: bold;
   }
   
+  .tasks-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .tasks-table th,
+  .tasks-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+  
+  .tasks-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .tasks-table tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .tasks-container {
+    padding: 20px;
+  }
+  
+  .tasks-table th {
+    cursor: pointer;
+  }
+  
+  .creator-info {
+    display: flex;
+    align-items: center;
+  }
+  
+  .creator-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
