@@ -2,8 +2,16 @@ import express from 'express';
 import pool, { testConnection } from './db.js';
 import authRoutes from './auth.js';
 import cors from 'cors';
+import UpdateRoutes from './updateAccount.js';
 
 const app = express();
+
+// Настройка CORS для localhost:3000
+app.use(cors({
+  origin: 'http://localhost:3000', // Разрешить только запросы с localhost:3000
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Разрешенные HTTP методы
+  allowedHeaders: ['Content-Type', 'Authorization'], // Разрешенные заголовки
+}));
 
 app.get('/healthcheck', async (req, res) => {
   try {
@@ -20,11 +28,11 @@ app.get('/healthcheck', async (req, res) => {
 });
 
 // Middleware
-app.use(cors());
 app.use(express.json()); // Для обработки JSON в теле запроса
 
 // Роуты
 app.use('/auth', authRoutes);
+app.use('/update', UpdateRoutes);
 
 const startServer = async () => {
   await testConnection(); // Проверить подключение при запуске сервера
