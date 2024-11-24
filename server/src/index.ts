@@ -3,6 +3,9 @@ import pool, { testConnection } from './db.js';
 import authRoutes from './auth.js';
 import cors from 'cors';
 import UpdateRoutes from './updateAccount.js';
+import teamRoutes from './routes/teamRoutes.js';
+import usersRoutes from './routes/usersRoutes.js';
+
 
 const app = express();
 
@@ -33,6 +36,10 @@ app.use(express.json()); // Для обработки JSON в теле запр�
 // Роуты
 app.use('/auth', authRoutes);
 app.use('/update', UpdateRoutes);
+app.use('/team', teamRoutes);
+app.use('/users', usersRoutes);
+
+
 
 const startServer = async () => {
   await testConnection(); // Проверить подключение при запуске сервера

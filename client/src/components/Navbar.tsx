@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import '../styles/Navbar.css';
+import React from "react";
+import { Link } from "react-router-dom";
+import "../styles/Navbar.css";
 
 const Navbar: React.FC = () => {
   return (
@@ -13,7 +13,7 @@ const Navbar: React.FC = () => {
           <Link to="/tasks">Tasks</Link>
         </li>
         <li>
-          <Link to="/team">Team</Link>
+          <Link to="/teams">Teams</Link>
         </li>
         <li>
           <Link to="/profile">Profile</Link>

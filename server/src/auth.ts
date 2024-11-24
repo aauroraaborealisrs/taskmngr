@@ -55,7 +55,7 @@ router.post('/register', async (req: Request<{}, {}, RegisterRequestBody>, res: 
     const token = jwt.sign(
       { id: newUser.rows[0].id, username: newUser.rows[0].username },
       JWT_SECRET,
-      { expiresIn: '1h' } // Токен действует 1 час
+      { expiresIn: '24h' } // Токен действует 1 час
     );
 
     // Возвращаем токен и данные пользователя
