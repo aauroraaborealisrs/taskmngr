@@ -1,5 +1,5 @@
 import express, { Request, Response } from "express";
-import pool from "../db.js"; // Подключение к базе данных
+import pool from "../db.js";
 import { authenticateToken } from "../authMiddleware.js";
 
 const router = express.Router();
@@ -7,8 +7,8 @@ const router = express.Router();
 interface CreateTaskBody {
   title: string;
   description?: string;
-  priority?: string; // 'high', 'medium', 'normal', 'low'
-  due_date?: string; // Формат даты в ISO
+  priority?: string;
+  due_date?: string;
   assigned_to?: number;
 }
 
@@ -19,10 +19,9 @@ router.post(
     const { teamId } = req.params;
     const { title, description, priority, due_date, assigned_to } =
       req.body as CreateTaskBody;
-    const creatorId = req.body.userId; // Берём ID текущего пользователя из токена
+    const creatorId = req.body.userId;
 
     try {
-      // Проверяем, существует ли команда
       const teamCheck = await pool.query("SELECT * FROM teams WHERE id = $1", [
         teamId,
       ]);
@@ -30,7 +29,6 @@ router.post(
         return res.status(404).json({ message: "Team not found" });
       }
 
-      // Создаём задачу
       const newTask = await pool.query(
         `INSERT INTO tasks (title, description, priority, due_date, creator_id, team_id, assigned_to) 
        VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
@@ -41,7 +39,7 @@ router.post(
           due_date || null,
           creatorId,
           teamId,
-          assigned_to || null, // Добавляем назначенного пользователя
+          assigned_to || null,
         ]
       );
 
@@ -60,10 +58,11 @@ router.get(
   "/:teamId/tasks",
   authenticateToken,
   async (req: Request, res: Response) => {
+    console.log("GET TASKS");
     const { teamId } = req.params;
+    console.log(teamId);
 
     try {
-      // Проверяем, существует ли команда
       const teamCheck = await pool.query("SELECT * FROM teams WHERE id = $1", [
         teamId,
       ]);
@@ -71,15 +70,45 @@ router.get(
         return res.status(404).json({ message: "Team not found" });
       }
 
-      // Получаем задачи команды
-      const tasks = await pool.query("SELECT * FROM tasks WHERE team_id = $1", [
-        teamId,
-      ]);
+      const tasks = await pool.query(
+        `
+        SELECT 
+          t.id,
+          t.title,
+          t.description,
+          t.priority,
+          t.status,
+          t.due_date,
+          t.created_at,
+          t.updated_at,
+          t.team_id,
+          json_build_object(
+            'name', u_creator.username,
+            'avatar', u_creator.avatar_url
+          ) AS creator,
+          CASE 
+            WHEN t.assigned_to IS NOT NULL THEN 
+              json_build_object(
+                'name', u_assigned.username,
+                'avatar', u_assigned.avatar_url
+              )
+            ELSE NULL
+          END AS assigned_to
+        FROM tasks t
+        LEFT JOIN users u_creator ON t.creator_id = u_creator.id
+        LEFT JOIN users u_assigned ON t.assigned_to = u_assigned.id
+        WHERE t.team_id = $1
+        ORDER BY t.created_at DESC
+        `,
+        [teamId]
+      );
 
       res.status(200).json({
         message: "Tasks fetched successfully",
         tasks: tasks.rows,
       });
+
+      console.log(tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -91,9 +120,9 @@ interface UpdateTaskBody {
   title?: string;
   description?: string;
   priority?: string;
-  status?: string; // 'todo', 'in progress', 'completed'
+  status?: string;
   due_date?: string;
-  assigned_to?: number; // ID пользователя
+  assigned_to?: number;
 }
 
 router.put(
@@ -105,7 +134,6 @@ router.put(
       req.body as UpdateTaskBody;
 
     try {
-      // Проверяем, существует ли команда
       const teamCheck = await pool.query("SELECT * FROM teams WHERE id = $1", [
         teamId,
       ]);
@@ -113,7 +141,6 @@ router.put(
         return res.status(404).json({ message: "Team not found" });
       }
 
-      // Проверяем, существует ли задача
       const taskCheck = await pool.query(
         "SELECT * FROM tasks WHERE id = $1 AND team_id = $2",
         [taskId, teamId]
@@ -122,7 +149,6 @@ router.put(
         return res.status(404).json({ message: "Task not found" });
       }
 
-      // Обновляем задачу
       const updates = [];
       const values: any[] = [taskId];
       if (title) {
@@ -175,7 +201,6 @@ router.delete(
     const { teamId, taskId } = req.params;
 
     try {
-      // Проверяем, существует ли команда
       const teamCheck = await pool.query("SELECT * FROM teams WHERE id = $1", [
         teamId,
       ]);
@@ -183,7 +208,6 @@ router.delete(
         return res.status(404).json({ message: "Team not found" });
       }
 
-      // Проверяем, существует ли задача
       const taskCheck = await pool.query(
         "SELECT * FROM tasks WHERE id = $1 AND team_id = $2",
         [taskId, teamId]
@@ -192,7 +216,6 @@ router.delete(
         return res.status(404).json({ message: "Task not found" });
       }
 
-      // Удаляем задачу
       await pool.query("DELETE FROM tasks WHERE id = $1", [taskId]);
 
       res.status(200).json({ message: "Task deleted successfully" });
@@ -204,6 +227,7 @@ router.delete(
 );
 
 router.get("/:teamId", authenticateToken, async (req, res) => {
+  console.log("GET TEAM ID");
   const { teamId } = req.params;
 
   try {
@@ -218,6 +242,8 @@ router.get("/:teamId", authenticateToken, async (req, res) => {
 });
 
 router.get("/", authenticateToken, async (req, res) => {
+  console.log("GET SORT ID");
+
   const { teamId, sortField = "created_at", sortOrder = "asc" } = req.query;
 
   if (!teamId) {
@@ -225,7 +251,6 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 
   try {
-    // Генерируем SQL-запрос с учетом сортировки
     const query = `
         SELECT 
           tasks.id,
@@ -233,17 +258,22 @@ router.get("/", authenticateToken, async (req, res) => {
           tasks.description,
           tasks.priority,
           tasks.status,
-          tasks.assigned_to,
           tasks.due_date,
           tasks.created_at,
           tasks.updated_at,
-          users.first_name AS creator_first_name,
-          users.last_name AS creator_last_name,
-          users.avatar_url AS creator_avatar_url
+          tasks.assigned_to,
+          creators.first_name AS creator_first_name,
+          creators.last_name AS creator_last_name,
+          creators.avatar_url AS creator_avatar_url,
+          assignees.first_name AS assigned_to_name,
+          assignees.last_name AS assigned_to_last_name,
+          assignees.avatar_url AS assigned_to_avatar
         FROM 
           tasks
         LEFT JOIN 
-          users ON tasks.creator_id = users.id
+          users AS creators ON tasks.creator_id = creators.id
+        LEFT JOIN 
+          users AS assignees ON tasks.assigned_to = assignees.id
         WHERE 
           tasks.team_id = $1
         ORDER BY 
@@ -251,6 +281,7 @@ router.get("/", authenticateToken, async (req, res) => {
       `;
 
     const tasks = await pool.query(query, [teamId]);
+    console.log(tasks.rows);
     res.json({ tasks: tasks.rows });
   } catch (error) {
     console.error("Error fetching tasks:", error);

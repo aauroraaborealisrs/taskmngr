@@ -10,7 +10,7 @@ interface Task {
   priority: string;
   status: string;
   creator: { name: string; avatar: string };
-  assigned_to: number | null;
+  assigned_to: { name: string; avatar: string } | null;
   due_date: string | null;
   created_at: string;
   updated_at: string;
@@ -18,9 +18,9 @@ interface Task {
 
 const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [showModal, setShowModal] = useState(false); // Управление состоянием модального окна
-  const [sortField, setSortField] = useState<keyof Task>("title"); // Поле для сортировки
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // Порядок сортировки
+  const [showModal, setShowModal] = useState(false);
+  const [sortField, setSortField] = useState<keyof Task>("title");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
 
@@ -45,6 +45,7 @@ const Tasks: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log(data);
 
         const mappedTasks = data.tasks.map((task: any) => ({
           id: task.id,
@@ -56,7 +57,12 @@ const Tasks: React.FC = () => {
             name: `${task.creator_first_name} ${task.creator_last_name}`,
             avatar: task.creator_avatar_url,
           },
-          assigned_to: task.assigned_to,
+          assigned_to: task.assigned_to_name
+            ? {
+                name: `${task.assigned_to_name} ${task.assigned_to_last_name}`,
+                avatar: task.assigned_to_avatar,
+              }
+            : null,
           due_date: task.due_date,
           created_at: task.created_at,
           updated_at: task.updated_at,
@@ -73,7 +79,7 @@ const Tasks: React.FC = () => {
 
   const updateTasks = () => {
     if (teamId) {
-      fetchTasks(teamId, sortField, sortOrder); // Повторно загружаем задачи после создания
+      fetchTasks(teamId, sortField, sortOrder);
     }
   };
 
@@ -144,7 +150,20 @@ const Tasks: React.FC = () => {
                     <span>{task.creator.name}</span>
                   </div>
                 </td>
-                <td>{task.assigned_to || "Unassigned"}</td>
+                <td>
+                  {task.assigned_to ? (
+                    <div className="creator-infoo">
+                      <img
+                        src={task.assigned_to.avatar || "/default-avatar.png"}
+                        alt={task.assigned_to.name}
+                        className="creator-avatar"
+                      />
+                      <span>{task.assigned_to.name}</span>
+                    </div>
+                  ) : (
+                    "Unassigned"
+                  )}
+                </td>
                 <td>
                   {task.due_date
                     ? new Date(task.due_date).toLocaleDateString()
