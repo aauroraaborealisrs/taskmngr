@@ -5,6 +5,7 @@ import cors from "cors";
 import UpdateRoutes from "./updateAccount.js";
 import teamRoutes from "./routes/teamRoutes.js";
 import usersRoutes from "./routes/usersRoutes.js";
+import tasksRoutes from "./routes/tasksRoutes.js";
 
 const app = express();
 
@@ -41,6 +42,8 @@ app.use("/auth", authRoutes);
 app.use("/update", UpdateRoutes);
 app.use("/team", teamRoutes);
 app.use("/users", usersRoutes);
+app.use("/tasks", tasksRoutes);
+
 
 const startServer = async () => {
   await testConnection(); // Проверить подключение при запуске сервера
