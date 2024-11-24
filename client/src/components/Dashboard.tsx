@@ -1,50 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import axios from 'axios';
+import React from 'react';
+import Navbar from './Navbar';
+import '../styles/Dashboard.css';
 
-const DashBoard = () => {
-  const [tasks, setTasks] = useState<any[]>([]);
-
-  // useEffect(() => {
-  //   axios.get('http://localhost:5000/tasks').then((res) => setTasks(res.data));
-  // }, []);
-
-  const onDragEnd = (result: any) => {
-    const { destination, source } = result;
-    if (!destination) return;
-
-    const reorderedTasks = Array.from(tasks);
-    const [removed] = reorderedTasks.splice(source.index, 1);
-    reorderedTasks.splice(destination.index, 0, removed);
-
-    setTasks(reorderedTasks);
-  };
-
+const DashBoard: React.FC = () => {
   return (
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="tasks">
-        {(provided) => (
-          <div {...provided.droppableProps} ref={provided.innerRef}>
-            {tasks.map((task, index) => (
-              <Draggable key={task.id} draggableId={task.id.toString()} index={index}>
-                {(provided) => (
-                  <div
-                    {...provided.draggableProps}
-                    {...provided.dragHandleProps}
-                    ref={provided.innerRef}
-                    className="task-card"
-                  >
-                    <h4>{task.title}</h4>
-                    <p>{task.status}</p>
-                  </div>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+    <div className='flex-row'>
+      <Navbar />
+      <div className="dashboard-content">
+        <h2>Welcome to your Dashboard</h2>
+        {/* Основной контент дашборда */}
+      </div>
+    </div>
   );
 };
 
