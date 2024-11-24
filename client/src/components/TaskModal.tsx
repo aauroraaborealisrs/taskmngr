@@ -1,13 +1,59 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import "../styles/TaskModal.css";
 
 interface TaskModalProps {
   teamId: string;
   onClose: () => void;
-  onTaskAdded: (task: any) => void;
+  onTaskUpdated: () => void; // Обновление задач в родительском компоненте
 }
 
-const TaskModal: React.FC<TaskModalProps> = ({ teamId, onClose, onTaskAdded }) => {
-  const [newTask, setNewTask] = useState({ title: "", description: "", priority: "normal", due_date: "" });
+interface TeamMember {
+  id: number;
+  username: string;
+}
+
+const TaskModal: React.FC<TaskModalProps> = ({ teamId, onClose, onTaskUpdated }) => {
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    priority: "normal",
+    status: "todo",
+    assigned_to: "",
+    due_date: "",
+  });
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+
+  // Fetch team members
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      const rawToken = localStorage.getItem("token");
+      const token = rawToken?.replace(/^"|"$/g, "");
+
+      try {
+        const response = await fetch(`http://localhost:5000/team/${teamId}/members`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const members = data.members.map((member: any) => ({
+            id: member.id,
+            username: member.username,
+          }));
+          setTeamMembers(members);
+        } else {
+          throw new Error("Failed to fetch team members");
+        }
+      } catch (err) {
+        console.error("Error fetching team members:", err);
+      }
+    };
+
+    fetchTeamMembers();
+  }, [teamId]);
 
   const handleNewTaskChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -16,21 +62,37 @@ const TaskModal: React.FC<TaskModalProps> = ({ teamId, onClose, onTaskAdded }) =
 
   const createTask = async () => {
     const rawToken = localStorage.getItem("token");
-    const token = rawToken?.replace(/^"|"$/g, "");
+    const token = rawToken?.replace(/^"|"$/g, ""); // Убираем кавычки из токена
 
     try {
-      const response = await fetch(`http://localhost:5000/tasks`, {
+      const response = await fetch(`http://localhost:5000/tasks/${teamId}/tasks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ ...newTask, team_id: teamId }),
+        body: JSON.stringify({
+          title: newTask.title,
+          description: newTask.description,
+          priority: newTask.priority,
+          due_date: newTask.due_date,
+          assigned_to: newTask.assigned_to || null, // Назначенный пользователь (если есть)
+        }),
       });
 
+      let a = JSON.stringify({
+        title: newTask.title,
+        description: newTask.description,
+        priority: newTask.priority,
+        due_date: newTask.due_date,
+        assigned_to: newTask.assigned_to || null, // Назначенный пользователь (если есть)
+      })
+
+      console.log(a);
+      
       if (response.ok) {
-        const data = await response.json();
-        onTaskAdded(data.task); // Передаем новую задачу в родительский компонент
+        // Обновляем задачи
+        onTaskUpdated();
         onClose(); // Закрываем модалку
       } else {
         throw new Error("Failed to create task");
@@ -62,6 +124,23 @@ const TaskModal: React.FC<TaskModalProps> = ({ teamId, onClose, onTaskAdded }) =
           <option value="low">Low</option>
           <option value="normal">Normal</option>
           <option value="high">High</option>
+        </select>
+        <select name="status" value={newTask.status} onChange={handleNewTaskChange}>
+          <option value="todo">To Do</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+        <select
+          name="assigned_to"
+          value={newTask.assigned_to}
+          onChange={handleNewTaskChange}
+        >
+          <option value="">Unassigned</option>
+          {teamMembers.map((member) => (
+            <option key={member.id} value={member.id}>
+              {member.username}
+            </option>
+          ))}
         </select>
         <input
           type="date"

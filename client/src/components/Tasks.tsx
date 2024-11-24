@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/Tasks.css";
+import TaskModal from "./TaskModal";
 
 interface Task {
   id: number;
@@ -8,7 +9,7 @@ interface Task {
   description: string;
   priority: string;
   status: string;
-  creator: { name: string; avatar: string }; // Обновлено для имени и аватарки
+  creator: { name: string; avatar: string };
   assigned_to: number | null;
   due_date: string | null;
   created_at: string;
@@ -17,15 +18,19 @@ interface Task {
 
 const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [showModal, setShowModal] = useState(false); // Управление состоянием модального окна
   const [sortField, setSortField] = useState<keyof Task>("title"); // Поле для сортировки
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc"); // Порядок сортировки
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
 
-  // Function to fetch tasks with mapping
-  const fetchTasks = async (teamId: string, sortField: keyof Task, sortOrder: "asc" | "desc") => {
+  const fetchTasks = async (
+    teamId: string,
+    sortField: keyof Task,
+    sortOrder: "asc" | "desc"
+  ) => {
     const rawToken = localStorage.getItem("token");
-    const token = rawToken?.replace(/^"|"$/g, ""); // Убираем кавычки
+    const token = rawToken?.replace(/^"|"$/g, "");
 
     try {
       const response = await fetch(
@@ -41,7 +46,6 @@ const Tasks: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
 
-        // Преобразуем данные в ожидаемый формат
         const mappedTasks = data.tasks.map((task: any) => ({
           id: task.id,
           title: task.title,
@@ -57,8 +61,8 @@ const Tasks: React.FC = () => {
           created_at: task.created_at,
           updated_at: task.updated_at,
         }));
-
         setTasks(mappedTasks);
+        console.log(mappedTasks);
       } else {
         throw new Error("Failed to fetch tasks");
       }
@@ -67,22 +71,30 @@ const Tasks: React.FC = () => {
     }
   };
 
-  // Effect to handle redirection and fetching tasks
+  const updateTasks = () => {
+    if (teamId) {
+      fetchTasks(teamId, sortField, sortOrder); // Повторно загружаем задачи после создания
+    }
+  };
+
   useEffect(() => {
     const selectedTeamId = localStorage.getItem("selectedTeamId");
 
     if (!teamId && selectedTeamId) {
       navigate(`/tasks/${selectedTeamId}`);
     } else if (teamId) {
-      fetchTasks(teamId, sortField, sortOrder); // Передаем параметры сортировки
+      fetchTasks(teamId, sortField, sortOrder);
     }
   }, [teamId, sortField, sortOrder, navigate]);
 
-  // Function to sort tasks
   const sortTasks = (field: keyof Task) => {
     const order = sortOrder === "asc" ? "desc" : "asc";
     setSortField(field);
     setSortOrder(order);
+  };
+
+  const addTaskToList = (newTask: Task) => {
+    setTasks((prev) => [...prev, newTask]);
   };
 
   return (
@@ -95,19 +107,23 @@ const Tasks: React.FC = () => {
           <thead>
             <tr>
               <th onClick={() => sortTasks("title")}>
-                Title {sortField === "title" && (sortOrder === "asc" ? "↑" : "↓")}
+                Title{" "}
+                {sortField === "title" && (sortOrder === "asc" ? "↑" : "↓")}
               </th>
               <th>Description</th>
               <th onClick={() => sortTasks("priority")}>
-                Priority {sortField === "priority" && (sortOrder === "asc" ? "↑" : "↓")}
+                Priority{" "}
+                {sortField === "priority" && (sortOrder === "asc" ? "↑" : "↓")}
               </th>
               <th onClick={() => sortTasks("status")}>
-                Status {sortField === "status" && (sortOrder === "asc" ? "↑" : "↓")}
+                Status{" "}
+                {sortField === "status" && (sortOrder === "asc" ? "↑" : "↓")}
               </th>
               <th>Creator</th>
               <th>Assigned To</th>
               <th onClick={() => sortTasks("due_date")}>
-                Due Date {sortField === "due_date" && (sortOrder === "asc" ? "↑" : "↓")}
+                Due Date{" "}
+                {sortField === "due_date" && (sortOrder === "asc" ? "↑" : "↓")}
               </th>
             </tr>
           </thead>
@@ -120,16 +136,34 @@ const Tasks: React.FC = () => {
                 <td>{task.status}</td>
                 <td>
                   <div className="creator-info">
-                    <img src={task.creator.avatar} alt={task.creator.name} className="creator-avatar" />
+                    <img
+                      src={task.creator.avatar}
+                      alt={task.creator.name}
+                      className="creator-avatar"
+                    />
                     <span>{task.creator.name}</span>
                   </div>
                 </td>
                 <td>{task.assigned_to || "Unassigned"}</td>
-                <td>{task.due_date ? new Date(task.due_date).toLocaleDateString() : "No deadline"}</td>
+                <td>
+                  {task.due_date
+                    ? new Date(task.due_date).toLocaleDateString()
+                    : "No deadline"}
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+      )}
+      <button className="create-task-button" onClick={() => setShowModal(true)}>
+        +
+      </button>
+      {showModal && (
+        <TaskModal
+          teamId={teamId!}
+          onClose={() => setShowModal(false)}
+          onTaskUpdated={updateTasks}
+        />
       )}
     </div>
   );
