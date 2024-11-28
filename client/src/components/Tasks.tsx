@@ -21,8 +21,8 @@ const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null); // Для редактирования задачи
-  const [sortField, setSortField] = useState<keyof Task>("title");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [sortField, setSortField] = useState<keyof Task>("created_at");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
 
@@ -179,6 +179,16 @@ const Tasks: React.FC = () => {
             ))}
           </tbody>
         </table>
+      )}
+      <button className="create-task-button" onClick={() => setShowModal(true)}>
+        +
+      </button>
+      {showModal && (
+        <TaskModal
+          teamId={teamId!}
+          onClose={() => setShowModal(false)}
+          onTaskUpdated={updateTasks}
+        />
       )}
       {showModal && selectedTask && (
         <EditTaskModal
