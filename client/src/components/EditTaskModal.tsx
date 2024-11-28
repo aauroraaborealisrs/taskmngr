@@ -30,6 +30,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
 }) => {
   const [updatedTask, setUpdatedTask] = useState(taskData); // Используем переданные данные задачи
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [isEditMode, setIsEditMode] = useState(false); // Режим редактирования
 
   // Fetch team members
   useEffect(() => {
@@ -99,51 +100,84 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   return (
     <div className="modal">
       <div className="modal-content">
-        <h2>Edit Task</h2>
-        <input
-          type="text"
-          name="title"
-          placeholder="Title"
-          value={updatedTask.title}
-          onChange={handleTaskChange}
-          required
-        />
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={updatedTask.description || ""}
-          onChange={handleTaskChange}
-        ></textarea>
-        <select name="priority" value={updatedTask.priority} onChange={handleTaskChange}>
-          <option value="low">Low</option>
-          <option value="normal">Normal</option>
-          <option value="high">High</option>
-        </select>
-        <select name="status" value={updatedTask.status} onChange={handleTaskChange}>
-          <option value="todo">To Do</option>
-          <option value="in progress">In Progress</option>
-          <option value="completed">Completed</option>
-        </select>
-        <select
-          name="assigned_to"
-          value={updatedTask.assigned_to || ""}
-          onChange={handleTaskChange}
-        >
-          <option value="">Unassigned</option>
-          {teamMembers.map((member) => (
-            <option key={member.id} value={member.id}>
-              {member.username}
-            </option>
-          ))}
-        </select>
-        <input
-          type="date"
-          name="due_date"
-          value={updatedTask.due_date || ""}
-          onChange={handleTaskChange}
-        />
-        <button onClick={saveTask}>Save</button>
-        <button onClick={onClose}>Cancel</button>
+        <h2>{isEditMode ? "Edit Task" : "View Task"}</h2>
+        {isEditMode ? (
+          <>
+            {/* Режим редактирования */}
+            <input
+              type="text"
+              name="title"
+              placeholder="Title"
+              value={updatedTask.title}
+              onChange={handleTaskChange}
+              required
+            />
+            <textarea
+              name="description"
+              placeholder="Description"
+              value={updatedTask.description || ""}
+              onChange={handleTaskChange}
+            ></textarea>
+            <select name="priority" value={updatedTask.priority} onChange={handleTaskChange}>
+              <option value="low">Low</option>
+              <option value="normal">Normal</option>
+              <option value="high">High</option>
+            </select>
+            <select name="status" value={updatedTask.status} onChange={handleTaskChange}>
+              <option value="todo">To Do</option>
+              <option value="in progress">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+            <select
+              name="assigned_to"
+              value={updatedTask.assigned_to || ""}
+              onChange={handleTaskChange}
+            >
+              <option value="">Unassigned</option>
+              {teamMembers.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.username}
+                </option>
+              ))}
+            </select>
+            <input
+              type="date"
+              name="due_date"
+              value={updatedTask.due_date || ""}
+              onChange={handleTaskChange}
+            />
+            <button onClick={saveTask}>Save</button>
+            <button onClick={() => setIsEditMode(false)}>Cancel Edit</button>
+          </>
+        ) : (
+          <>
+            {/* Режим просмотра */}
+            <p>
+              <strong>Title:</strong> {updatedTask.title}
+            </p>
+            <p>
+              <strong>Description:</strong> {updatedTask.description || "No description"}
+            </p>
+            <p>
+              <strong>Priority:</strong> {updatedTask.priority}
+            </p>
+            <p>
+              <strong>Status:</strong> {updatedTask.status}
+            </p>
+            <p>
+              <strong>Assigned To:</strong>{" "}
+              {updatedTask.assigned_to
+                ? teamMembers.find((member) => member.id === updatedTask.assigned_to)?.username ||
+                  "Unknown"
+                : "Unassigned"}
+            </p>
+            <p>
+              <strong>Due Date:</strong> {updatedTask.due_date || "No due date"}
+            </p>
+            <button onClick={() => setIsEditMode(true)}>Edit</button>
+          </>
+        )}
+        <button onClick={onClose}>Close</button>
       </div>
     </div>
   );

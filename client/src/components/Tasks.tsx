@@ -4,7 +4,7 @@ import "../styles/Tasks.css";
 import EditTaskModal from "./EditTaskModal";
 import CalendarView from "./CalendarView";
 import CreateTaskModal from "./CreateTaskModal";
-import KanbanBoard from "./KanbanBoard"; 
+import KanbanBoard from "./KanbanBoard";
 
 interface Task {
   id: number;
@@ -21,7 +21,7 @@ interface Task {
 
 const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [showModal, setShowModal] = useState(false);
+  const [activeModal, setActiveModal] = useState<"create" | "edit" | null>(null); // Указывает, какая модалка открыта
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [sortField, setSortField] = useState<keyof Task>("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -135,12 +135,12 @@ const Tasks: React.FC = () => {
 
   const openEditModal = (task: Task) => {
     setSelectedTask(task);
-    setShowModal(true);
+    setActiveModal("edit");
   };
 
-  const closeEditModal = () => {
+  const closeModal = () => {
     setSelectedTask(null);
-    setShowModal(false);
+    setActiveModal(null);
   };
 
   return (
@@ -228,7 +228,7 @@ const Tasks: React.FC = () => {
           )}
           <button
             className="create-task-button"
-            onClick={() => setShowModal(true)}
+            onClick={() => setActiveModal("create")}
           >
             +
           </button>
@@ -251,7 +251,7 @@ const Tasks: React.FC = () => {
           />
           <button
             className="create-task-button"
-            onClick={() => setShowModal(true)}
+            onClick={() => setActiveModal("create")}
           >
             +
           </button>
@@ -270,20 +270,20 @@ const Tasks: React.FC = () => {
           />
           <button
             className="create-task-button"
-            onClick={() => setShowModal(true)}
+            onClick={() => setActiveModal("create")}
           >
             +
           </button>
         </>
       )}
-      {showModal && (
+      {activeModal === "create" && (
         <CreateTaskModal
           teamId={teamId!}
-          onClose={() => setShowModal(false)}
+          onClose={closeModal}
           onTaskUpdated={updateTasks}
         />
       )}
-      {showModal && selectedTask && (
+      {activeModal === "edit" && selectedTask && (
         <EditTaskModal
           teamId={teamId!}
           taskId={selectedTask.id}
@@ -297,7 +297,7 @@ const Tasks: React.FC = () => {
               : null,
             due_date: selectedTask.due_date,
           }}
-          onClose={closeEditModal}
+          onClose={closeModal}
           onTaskUpdated={updateTasks}
         />
       )}
