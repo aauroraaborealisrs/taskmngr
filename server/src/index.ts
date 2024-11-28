@@ -13,7 +13,7 @@ const app = express();
 app.use(
   cors({
     origin: "http://localhost:3000", // Разрешить только запросы с localhost:3000
-    methods: ["GET", "POST", "PUT", "DELETE"], // Разрешенные HTTP методы
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"], // Разрешенные HTTP методы
     allowedHeaders: ["Content-Type", "Authorization"], // Разрешенные заголовки
   }),
 );

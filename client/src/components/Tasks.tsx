@@ -88,6 +88,35 @@ const Tasks: React.FC = () => {
     }
   };
 
+  const updateTaskStatus = async (taskId: number, newStatus: string) => {
+    const rawToken = localStorage.getItem("token");
+    const token = rawToken?.replace(/^"|"$/g, "");
+
+    try {
+      const response = await fetch(`http://localhost:5000/tasks/${taskId}`, {
+        method: "PATCH", // Используем метод PATCH для обновления
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (response.ok) {
+        const updatedTask = await response.json();
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === taskId ? { ...task, status: updatedTask.status } : task
+          )
+        );
+      } else {
+        console.error("Failed to update task status");
+      }
+    } catch (err) {
+      console.error("Error updating task status:", err);
+    }
+  };
+
   useEffect(() => {
     const selectedTeamId = localStorage.getItem("selectedTeamId");
 
@@ -237,6 +266,7 @@ const Tasks: React.FC = () => {
                 openEditModal(fullTask);
               }
             }}
+            onTaskStatusChange={updateTaskStatus}
           />
           <button
             className="create-task-button"

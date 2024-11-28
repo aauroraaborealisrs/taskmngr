@@ -318,4 +318,31 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
+router.patch("/:taskId", authenticateToken, async (req: Request, res: Response) => {
+  const { taskId } = req.params;
+  const { status } = req.body;
+
+  // Проверяем, что статус является допустимым
+  if (!["todo", "in progress", "completed"].includes(status)) {
+    return res.status(400).json({ message: "Invalid status" });
+  }
+
+  try {
+    const updatedTask = await pool.query(
+      `UPDATE tasks SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *`,
+      [status, taskId]
+    );
+
+    if (updatedTask.rowCount === 0) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.status(200).json(updatedTask.rows[0]);
+  } catch (error) {
+    console.error("Error updating task:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+
 export default router;
