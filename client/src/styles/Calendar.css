@@ -1,0 +1,19 @@
+.calendar-view {
+    margin: 20px 0;
+  }
+  
+  .calendar-tasks {
+    list-style-type: none;
+    padding: 0;
+    margin: 5px 0 0;
+    font-size: 12px;
+  }
+  
+  .calendar-tasks li {
+    background: #3e98c7;
+    color: white;
+    padding: 2px 4px;
+    margin: 2px 0;
+    border-radius: 4px;
+  }
+  

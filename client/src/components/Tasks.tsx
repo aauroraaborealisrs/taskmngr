@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/Tasks.css";
-import TaskModal from "./TaskModal";
 import EditTaskModal from "./EditTaskModal"; // Импортируем модалку для редактирования
+import CalendarView from "./CalendarView";
+import CreateTaskModal from "./CreateTaskModal";
 
 interface Task {
   id: number;
@@ -24,6 +25,7 @@ const Tasks: React.FC = () => {
   const [sortField, setSortField] = useState<keyof Task>("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const { teamId } = useParams<{ teamId: string }>();
+  const [viewMode, setViewMode] = useState<"table" | "calendar">("table"); // Переключение вида
   const navigate = useNavigate();
 
   const fetchTasks = async (
@@ -112,79 +114,119 @@ const Tasks: React.FC = () => {
   return (
     <div className="tasks-container">
       <h1>Tasks for Team: {teamId}</h1>
-      {tasks.length === 0 ? (
-        <p>No tasks available for this team.</p>
+      <div className="view-switch">
+        <button onClick={() => setViewMode("table")}>Table View</button>
+        <button onClick={() => setViewMode("calendar")}>Calendar View</button>
+      </div>
+      {viewMode === "table" ? (
+        <>
+          {tasks.length === 0 ? (
+            <p>No tasks available for this team.</p>
+          ) : (
+            <table className="tasks-table">
+              <thead>
+                <tr>
+                  <th onClick={() => sortTasks("title")}>
+                    Title{" "}
+                    {sortField === "title" && (sortOrder === "asc" ? "↑" : "↓")}
+                  </th>
+                  <th>Description</th>
+                  <th onClick={() => sortTasks("priority")}>
+                    Priority{" "}
+                    {sortField === "priority" &&
+                      (sortOrder === "asc" ? "↑" : "↓")}
+                  </th>
+                  <th onClick={() => sortTasks("status")}>
+                    Status{" "}
+                    {sortField === "status" &&
+                      (sortOrder === "asc" ? "↑" : "↓")}
+                  </th>
+                  <th>Creator</th>
+                  <th>Assigned To</th>
+                  <th onClick={() => sortTasks("due_date")}>
+                    Due Date{" "}
+                    {sortField === "due_date" &&
+                      (sortOrder === "asc" ? "↑" : "↓")}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {tasks.map((task) => (
+                  <tr key={task.id} onClick={() => openEditModal(task)}>
+                    <td>{task.title}</td>
+                    <td>{task.description}</td>
+                    <td>{task.priority}</td>
+                    <td>{task.status}</td>
+                    <td>
+                      <div className="creator-info">
+                        <img
+                          src={task.creator.avatar}
+                          alt={task.creator.name}
+                          className="creator-avatar"
+                        />
+                        <span>{task.creator.name}</span>
+                      </div>
+                    </td>
+                    <td>
+                      {task.assigned_to ? (
+                        <div className="creator-info">
+                          <img
+                            src={
+                              task.assigned_to.avatar || "/default-avatar.png"
+                            }
+                            alt={task.assigned_to.name}
+                            className="creator-avatar"
+                          />
+                          <span>{task.assigned_to.name}</span>
+                        </div>
+                      ) : (
+                        "Unassigned"
+                      )}
+                    </td>
+                    <td>
+                      {task.due_date
+                        ? new Date(task.due_date).toLocaleDateString()
+                        : "No deadline"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <button
+            className="create-task-button"
+            onClick={() => setShowModal(true)}
+          >
+            +
+          </button>
+        </>
       ) : (
-        <table className="tasks-table">
-          <thead>
-            <tr>
-              <th onClick={() => sortTasks("title")}>
-                Title{" "}
-                {sortField === "title" && (sortOrder === "asc" ? "↑" : "↓")}
-              </th>
-              <th>Description</th>
-              <th onClick={() => sortTasks("priority")}>
-                Priority{" "}
-                {sortField === "priority" && (sortOrder === "asc" ? "↑" : "↓")}
-              </th>
-              <th onClick={() => sortTasks("status")}>
-                Status{" "}
-                {sortField === "status" && (sortOrder === "asc" ? "↑" : "↓")}
-              </th>
-              <th>Creator</th>
-              <th>Assigned To</th>
-              <th onClick={() => sortTasks("due_date")}>
-                Due Date{" "}
-                {sortField === "due_date" && (sortOrder === "asc" ? "↑" : "↓")}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {tasks.map((task) => (
-              <tr key={task.id} onClick={() => openEditModal(task)}>
-                <td>{task.title}</td>
-                <td>{task.description}</td>
-                <td>{task.priority}</td>
-                <td>{task.status}</td>
-                <td>
-                  <div className="creator-info">
-                    <img
-                      src={task.creator.avatar}
-                      alt={task.creator.name}
-                      className="creator-avatar"
-                    />
-                    <span>{task.creator.name}</span>
-                  </div>
-                </td>
-                <td>
-                  {task.assigned_to ? (
-                    <div className="creator-info">
-                      <img
-                        src={task.assigned_to.avatar || "/default-avatar.png"}
-                        alt={task.assigned_to.name}
-                        className="creator-avatar"
-                      />
-                      <span>{task.assigned_to.name}</span>
-                    </div>
-                  ) : (
-                    "Unassigned"
-                  )}
-                </td>
-                <td>
-                  {task.due_date
-                    ? new Date(task.due_date).toLocaleDateString()
-                    : "No deadline"}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
-      <button className="create-task-button" onClick={() => setShowModal(true)}>
+        <>        
+        <CalendarView
+          tasks={tasks.map((task) => ({
+            id: task.id,
+            title: task.title,
+            status: task.status,
+            due_date: task.due_date,
+          }))}
+          onTaskClick={(task) => {
+            const fullTask = tasks.find((t) => t.id === task.id);
+            if (fullTask) {
+              openEditModal(fullTask);
+            }
+          }}
+        />
+
+<button
+        className="create-task-button"
+        onClick={() => setShowModal(true)}
+      >
         +
       </button>
+    </>
+      )}
       {showModal && (
-        <TaskModal
+        <CreateTaskModal
           teamId={teamId!}
           onClose={() => setShowModal(false)}
           onTaskUpdated={updateTasks}

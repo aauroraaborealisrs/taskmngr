@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import "../styles/TaskModal.css";
+import "../styles/CreateTaskModal.css";
 
-interface TaskModalProps {
+interface CreateTaskModalProps {
   teamId: string;
   onClose: () => void;
   onTaskUpdated: () => void; // Обновление задач в родительском компоненте
@@ -12,7 +12,7 @@ interface TeamMember {
   username: string;
 }
 
-const TaskModal: React.FC<TaskModalProps> = ({ teamId, onClose, onTaskUpdated }) => {
+const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ teamId, onClose, onTaskUpdated }) => {
   const [newTask, setNewTask] = useState({
     title: "",
     description: "",
@@ -153,4 +153,4 @@ const TaskModal: React.FC<TaskModalProps> = ({ teamId, onClose, onTaskUpdated })
   );
 };
 
-export default TaskModal;
+export default CreateTaskModal;
