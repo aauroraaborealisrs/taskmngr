@@ -50,7 +50,6 @@ const Navbar: React.FC = () => {
     fetchTeams();
   }, [selectedTeam, navigate]);
 
-  // Обработчик выбора команды
   const handleTeamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const teamId = e.target.value;
     setSelectedTeam(teamId);
@@ -61,17 +60,17 @@ const Navbar: React.FC = () => {
   return (
     <nav className="sidebar">
       <div className="sidebar-logo">
-        <h1>TaskManager</h1>
+        <h2>TaskManager</h2>
       </div>
 
-      {/* Выбор команды */}
       <div className="sidebar-team-select">
+        <div className="column custom-select-wrapper">
         <label htmlFor="team-select">Select Team:</label>
         <select
           id="team-select"
           value={selectedTeam}
           onChange={handleTeamChange}
-          className="team-select"
+          className="team-select custom-select"
         >
           {teams.map((team) => (
             <option key={team.team_id} value={team.team_id}>
@@ -79,6 +78,7 @@ const Navbar: React.FC = () => {
             </option>
           ))}
         </select>
+        </div>
       </div>
 
       <ul className="sidebar-links">
@@ -95,7 +95,7 @@ const Navbar: React.FC = () => {
           <Link to="/me">Me</Link>
         </li>
         <li>
-          <Link to="/pomodoro">PomodoroTimer</Link>
+          <Link to="/pomodoro">Pomodoro</Link>
         </li>
       </ul>
 

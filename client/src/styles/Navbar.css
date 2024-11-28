@@ -1,22 +1,21 @@
 body {
   display: flex;
   margin: 0;
-  font-family: Arial, sans-serif;
 }
 
 .sidebar {
   width: 250px;
   height: 100vh;
-  background-color: #3f51b5;
-  color: #fff;
+  background-color: var(--grey);
+  color: var(--text);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  padding-left: 20px;
 }
 
 .sidebar-logo {
-  padding: 20px;
   text-align: center;
   font-size: 24px;
   font-weight: bold;
@@ -28,6 +27,7 @@ body {
   padding: 0;
   margin: 0;
   flex-grow: 1;
+  height: fit-content;
 }
 
 .sidebar-links li {
@@ -36,9 +36,10 @@ body {
 
 .sidebar-links a {
   display: block;
-  padding: 15px 20px;
+  border-radius: 5px;
+  padding: 15px 5px;
   text-decoration: none;
-  color: #fff;
+  color: var(--text);
   font-size: 18px;
   transition:
     background 0.3s,
@@ -46,8 +47,7 @@ body {
 }
 
 .sidebar-links a:hover {
-  background-color: #283593;
-  color: #ffeb3b;
+  background-color: var(--grey-accent);
 }
 
 .sidebar-actions {
@@ -58,16 +58,80 @@ body {
 .sidebar-logout {
   background: none;
   border: 1px solid #fff;
-  color: #fff;
-  padding: 10px 20px;
   border-radius: 5px;
   cursor: pointer;
-  transition:
-    background 0.3s,
-    color 0.3s;
 }
 
-.sidebar-logout:hover {
-  background: #ffeb3b;
-  color: #3f51b5;
+
+.custom-select-wrapper {
+  margin: 10px 0;
+}
+
+.custom-select-wrapper label {
+  margin: 10px 0;
+  font-size: 18px;
+  padding-left: 5px;
+}
+
+
+
+.custom-select {
+  appearance: none;
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #fff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23666666'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 15px;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+}
+
+.custom-select:hover {
+  border-color: var(--grey-accent);
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: var(--grey-accent);
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none; /* Для Safari */
+  -moz-appearance: none; /* Для Firefox */
+  background-color: #fff; /* Устанавливаем белый фон */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  outline: none;
+}
+
+select:focus {
+  border-color: #888;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+}
+
+option {
+  background-color: #fff !important; /* Цвет фона опций */
+  color: #333 !important; /* Цвет текста опций */
+}
+
+/* Убираем стандартный синий эффект на hover */
+option:hover,
+option:focus {
+  background-color: var(--grey-accent, #f0f0f0) !important; /* Ваш цвет при наведении */
+  color: #000 !important;
+}
+
+/* Убираем стиль активного элемента */
+option:checked {
+  background-color: var(--grey-accent, #e6e6e6) !important;
+  color: #000 !important;
 }

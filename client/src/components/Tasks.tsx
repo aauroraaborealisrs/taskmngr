@@ -21,13 +21,17 @@ interface Task {
 
 const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [activeModal, setActiveModal] = useState<"create" | "edit" | null>(null); // Указывает, какая модалка открыта
+  const [activeModal, setActiveModal] = useState<"create" | "edit" | null>(
+    null
+  );
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [sortField, setSortField] = useState<keyof Task>("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [viewMode, setViewMode] = useState<"table" | "calendar" | "kanban">(
     "table"
-  ); // Добавляем Kanban в переключение вида
+  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [tasksPerPage] = useState(10);
   const { teamId } = useParams<{ teamId: string }>();
   const navigate = useNavigate();
 
@@ -143,88 +147,135 @@ const Tasks: React.FC = () => {
     setActiveModal(null);
   };
 
+  const indexOfLastTask = currentPage * tasksPerPage;
+  const indexOfFirstTask = indexOfLastTask - tasksPerPage;
+  const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
+
+  const totalPages = Math.ceil(tasks.length / tasksPerPage);
+
   return (
     <div className="tasks-container">
-      <h1>Tasks for Team: {teamId}</h1>
+      <h1>Tasks for team</h1>
       <div className="view-switch">
-        <button onClick={() => setViewMode("table")}>Table View</button>
-        <button onClick={() => setViewMode("calendar")}>Calendar View</button>
-        <button onClick={() => setViewMode("kanban")}>Kanban View</button>
+        <button
+          className="view-switch-btn"
+          onClick={() => setViewMode("table")}
+        >
+          Table
+        </button>
+        <button
+          className="view-switch-btn"
+          onClick={() => setViewMode("calendar")}
+        >
+          Calendar
+        </button>
+        <button
+          className="view-switch-btn"
+          onClick={() => setViewMode("kanban")}
+        >
+          Kanban
+        </button>
       </div>
       {viewMode === "table" ? (
         <>
           {tasks.length === 0 ? (
             <p>No tasks available for this team.</p>
           ) : (
-            <table className="tasks-table">
-              <thead>
-                <tr>
-                  <th onClick={() => sortTasks("title")}>
-                    Title{" "}
-                    {sortField === "title" && (sortOrder === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th>Description</th>
-                  <th onClick={() => sortTasks("priority")}>
-                    Priority{" "}
-                    {sortField === "priority" &&
-                      (sortOrder === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th onClick={() => sortTasks("status")}>
-                    Status{" "}
-                    {sortField === "status" &&
-                      (sortOrder === "asc" ? "↑" : "↓")}
-                  </th>
-                  <th>Creator</th>
-                  <th>Assigned To</th>
-                  <th onClick={() => sortTasks("due_date")}>
-                    Due Date{" "}
-                    {sortField === "due_date" &&
-                      (sortOrder === "asc" ? "↑" : "↓")}
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {tasks.map((task) => (
-                  <tr key={task.id} onClick={() => openEditModal(task)}>
-                    <td>{task.title}</td>
-                    <td>{task.description}</td>
-                    <td>{task.priority}</td>
-                    <td>{task.status}</td>
-                    <td>
-                      <div className="creator-info">
-                        <img
-                          src={task.creator.avatar}
-                          alt={task.creator.name}
-                          className="creator-avatar"
-                        />
-                        <span>{task.creator.name}</span>
-                      </div>
-                    </td>
-                    <td>
-                      {task.assigned_to ? (
+            <>
+              <table className="tasks-table">
+                <thead>
+                  <tr>
+                    <th onClick={() => sortTasks("title")}>
+                      Title{" "}
+                      {sortField === "title" &&
+                        (sortOrder === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th>Description</th>
+                    <th onClick={() => sortTasks("priority")}>
+                      Priority{" "}
+                      {sortField === "priority" &&
+                        (sortOrder === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th onClick={() => sortTasks("status")}>
+                      Status{" "}
+                      {sortField === "status" &&
+                        (sortOrder === "asc" ? "↑" : "↓")}
+                    </th>
+                    <th>Creator</th>
+                    <th>Assigned To</th>
+                    <th onClick={() => sortTasks("due_date")}>
+                      Due Date{" "}
+                      {sortField === "due_date" &&
+                        (sortOrder === "asc" ? "↑" : "↓")}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {currentTasks.map((task) => (
+                    <tr key={task.id} onClick={() => openEditModal(task)}>
+                      <td>{task.title}</td>
+                      <td>{task.description}</td>
+                      <td className={`${task.priority.toLowerCase()}`}>
+                        {task.priority}
+                      </td>
+                      <td className={`${task.status.toLowerCase()}`}>
+                        {task.status}
+                      </td>
+                      <td>
                         <div className="creator-info">
                           <img
-                            src={
-                              task.assigned_to.avatar || "/default-avatar.png"
-                            }
-                            alt={task.assigned_to.name}
+                            src={task.creator.avatar}
+                            alt={task.creator.name}
                             className="creator-avatar"
                           />
-                          <span>{task.assigned_to.name}</span>
+                          <span>{task.creator.name}</span>
                         </div>
-                      ) : (
-                        "Unassigned"
-                      )}
-                    </td>
-                    <td>
-                      {task.due_date
-                        ? new Date(task.due_date).toLocaleDateString()
-                        : "No deadline"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </td>
+                      <td>
+                        {task.assigned_to ? (
+                          <div className="creator-info">
+                            <img
+                              src={
+                                task.assigned_to.avatar || "/default-avatar.png"
+                              }
+                              alt={task.assigned_to.name}
+                              className="creator-avatar"
+                            />
+                            <span>{task.assigned_to.name}</span>
+                          </div>
+                        ) : (
+                          "Unassigned"
+                        )}
+                      </td>
+                      <td>
+                        {task.due_date
+                          ? new Date(task.due_date).toLocaleDateString()
+                          : "No deadline"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="pagination">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((prev) => prev - 1)}
+                  className="view-switch-btn"
+                >
+                  Previous
+                </button>
+                <span>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((prev) => prev + 1)}
+                  className="view-switch-btn"
+                >
+                  Next
+                </button>
+              </div>
+            </>
           )}
           <button
             className="create-task-button"
@@ -240,6 +291,7 @@ const Tasks: React.FC = () => {
               id: task.id,
               title: task.title,
               status: task.status,
+              priority: task.priority,
               due_date: task.due_date,
             }))}
             onTaskClick={(task) => {

@@ -6,6 +6,7 @@ interface CalendarTask {
   id: number;
   title: string;
   status: string;
+  priority: string;
   due_date: string | null;
 }
 
@@ -33,16 +34,13 @@ const CalendarView: React.FC<CalendarViewProps> = ({ tasks, onTaskClick }) => {
         {tasksForDate.map((task) => (
           <div
             key={task.id}
-            className={`calendar-task ${
-              task.status === "completed" ? "completed" : "in-progress"
-            }`}
+            className={`calendar-task ${task.priority.toLowerCase()} ${task.status.toLowerCase()}`}
             onClick={(e) => {
               e.stopPropagation();
               onTaskClick(task); // Открытие задачи
             }}
           >
             {task.title}
-            {task.status}
           </div>
         ))}
         
