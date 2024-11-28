@@ -55,10 +55,13 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ teamId, onClose, onTa
     fetchTeamMembers();
   }, [teamId]);
 
-  const handleNewTaskChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleNewTaskChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setNewTask({ ...newTask, [name]: value });
   };
+  
 
   const createTask = async () => {
     const rawToken = localStorage.getItem("token");
@@ -75,6 +78,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ teamId, onClose, onTa
           title: newTask.title,
           description: newTask.description,
           priority: newTask.priority,
+          status: newTask.status,
           due_date: newTask.due_date,
           assigned_to: newTask.assigned_to || null, // Назначенный пользователь (если есть)
         }),
@@ -84,9 +88,12 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ teamId, onClose, onTa
         title: newTask.title,
         description: newTask.description,
         priority: newTask.priority,
+        status: newTask.status,
         due_date: newTask.due_date,
         assigned_to: newTask.assigned_to || null, // Назначенный пользователь (если есть)
       })
+
+      console.log(a);
       
       if (response.ok) {
         // Обновляем задачи

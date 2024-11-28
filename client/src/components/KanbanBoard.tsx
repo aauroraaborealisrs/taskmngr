@@ -5,6 +5,7 @@ export interface KanbanTask {
   id: number;
   title: string;
   status: string;
+  description: string;
 }
 
 interface KanbanBoardProps {
@@ -33,7 +34,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ tasks, onTaskClick }) => {
                 onClick={() => onTaskClick(task)}
               >
                 {task.title}
-                {task.status}
+                {task.description}
               </div>
             ))}
           </div>

@@ -30,18 +30,19 @@ router.post(
       }
 
       const newTask = await pool.query(
-        `INSERT INTO tasks (title, description, priority, due_date, creator_id, team_id, assigned_to) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        `INSERT INTO tasks (title, description, priority, status, due_date, creator_id, team_id, assigned_to) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
         [
           title,
           description || null,
           priority || "normal",
+          req.body.status || "todo", // Добавляем явное указание статуса
           due_date || null,
           creatorId,
           teamId,
           assigned_to || null,
         ]
-      );
+      );      
 
       res.status(201).json({
         message: "Task created successfully",
