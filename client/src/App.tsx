@@ -8,6 +8,8 @@ import Me from "./components/Me";
 import Teams from "./components/Teams";
 import Tasks from "./components/Tasks";
 import Navbar from "./components/Navbar";
+import PomodoroTimer from "./components/PomodoroTimer";
+
 import "./App.css";
 
 
@@ -32,6 +34,7 @@ const App: React.FC = () => {
           <Route index element={<Home />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="me" element={<Me />} />
+          <Route path="pomodoro" element={<PomodoroTimer />} />
           <Route path="teams" element={<Teams />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="/tasks/:teamId" element={<Tasks />} />

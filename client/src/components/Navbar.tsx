@@ -94,6 +94,9 @@ const Navbar: React.FC = () => {
         <li>
           <Link to="/me">Me</Link>
         </li>
+        <li>
+          <Link to="/pomodoro">PomodoroTimer</Link>
+        </li>
       </ul>
 
       <div className="sidebar-actions">
