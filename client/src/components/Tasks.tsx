@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/Tasks.css";
-import EditTaskModal from "./EditTaskModal"; // Импортируем модалку для редактирования
+import EditTaskModal from "./EditTaskModal";
 import CalendarView from "./CalendarView";
 import CreateTaskModal from "./CreateTaskModal";
+import KanbanBoard from "./KanbanBoard"; 
 
 interface Task {
   id: number;
@@ -21,11 +22,13 @@ interface Task {
 const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null); // Для редактирования задачи
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [sortField, setSortField] = useState<keyof Task>("created_at");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [viewMode, setViewMode] = useState<"table" | "calendar" | "kanban">(
+    "table"
+  ); // Добавляем Kanban в переключение вида
   const { teamId } = useParams<{ teamId: string }>();
-  const [viewMode, setViewMode] = useState<"table" | "calendar">("table"); // Переключение вида
   const navigate = useNavigate();
 
   const fetchTasks = async (
@@ -117,6 +120,7 @@ const Tasks: React.FC = () => {
       <div className="view-switch">
         <button onClick={() => setViewMode("table")}>Table View</button>
         <button onClick={() => setViewMode("calendar")}>Calendar View</button>
+        <button onClick={() => setViewMode("kanban")}>Kanban View</button>
       </div>
       {viewMode === "table" ? (
         <>
@@ -200,30 +204,47 @@ const Tasks: React.FC = () => {
             +
           </button>
         </>
+      ) : viewMode === "calendar" ? (
+        <>
+          <CalendarView
+            tasks={tasks.map((task) => ({
+              id: task.id,
+              title: task.title,
+              status: task.status,
+              due_date: task.due_date,
+            }))}
+            onTaskClick={(task) => {
+              const fullTask = tasks.find((t) => t.id === task.id);
+              if (fullTask) {
+                openEditModal(fullTask);
+              }
+            }}
+          />
+          <button
+            className="create-task-button"
+            onClick={() => setShowModal(true)}
+          >
+            +
+          </button>
+        </>
       ) : (
-        <>        
-        <CalendarView
-          tasks={tasks.map((task) => ({
-            id: task.id,
-            title: task.title,
-            status: task.status,
-            due_date: task.due_date,
-          }))}
-          onTaskClick={(task) => {
-            const fullTask = tasks.find((t) => t.id === task.id);
-            if (fullTask) {
-              openEditModal(fullTask);
-            }
-          }}
-        />
-
-<button
-        className="create-task-button"
-        onClick={() => setShowModal(true)}
-      >
-        +
-      </button>
-    </>
+        <>
+          <KanbanBoard
+            tasks={tasks}
+            onTaskClick={(task) => {
+              const fullTask = tasks.find((t) => t.id === task.id);
+              if (fullTask) {
+                openEditModal(fullTask);
+              }
+            }}
+          />
+          <button
+            className="create-task-button"
+            onClick={() => setShowModal(true)}
+          >
+            +
+          </button>
+        </>
       )}
       {showModal && (
         <CreateTaskModal

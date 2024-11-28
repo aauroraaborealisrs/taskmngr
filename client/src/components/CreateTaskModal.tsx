@@ -125,7 +125,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ teamId, onClose, onTa
         </select>
         <select name="status" value={newTask.status} onChange={handleNewTaskChange}>
           <option value="todo">To Do</option>
-          <option value="in_progress">In Progress</option>
+          <option value="in progress">In Progress</option>
           <option value="completed">Completed</option>
         </select>
         <select

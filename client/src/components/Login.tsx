@@ -46,7 +46,6 @@ const Login: React.FC = () => {
         saveToLocalStorage("user", result.user);
 
         alert("Login successful!");
-        navigate("/dashboard"); // Перенаправление на Dashboard
       } else {
         const error = await response.json();
         alert(`Login failed: ${error.message}`);

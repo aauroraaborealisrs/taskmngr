@@ -78,7 +78,6 @@ const Me: React.FC = () => {
       if (response.ok) {
         const updatedUser = await response.json();
         alert("Your account has been updated successfully!");
-        navigate("/dashboard"); // Перенаправление после обновления
       } else {
         const error = await response.json();
         alert(`Update failed: ${error.message}`);

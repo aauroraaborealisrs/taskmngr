@@ -121,7 +121,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         </select>
         <select name="status" value={updatedTask.status} onChange={handleTaskChange}>
           <option value="todo">To Do</option>
-          <option value="in_progress">In Progress</option>
+          <option value="in progress">In Progress</option>
           <option value="completed">Completed</option>
         </select>
         <select

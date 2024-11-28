@@ -15,7 +15,6 @@ interface CalendarViewProps {
 }
 
 const CalendarView: React.FC<CalendarViewProps> = ({ tasks, onTaskClick }) => {
-  console.log("Tasks for Calendar:", tasks); // Проверка входных данных
 
   const getTileContent = (date: Date) => {
     // Преобразуем дату календаря в формат YYYY-MM-DD
