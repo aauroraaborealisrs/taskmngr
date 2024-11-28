@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/Tasks.css";
 import TaskModal from "./TaskModal";
+import EditTaskModal from "./EditTaskModal"; // Импортируем модалку для редактирования
 
 interface Task {
   id: number;
@@ -19,6 +20,7 @@ interface Task {
 const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null); // Для редактирования задачи
   const [sortField, setSortField] = useState<keyof Task>("title");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const { teamId } = useParams<{ teamId: string }>();
@@ -45,7 +47,6 @@ const Tasks: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
 
         const mappedTasks = data.tasks.map((task: any) => ({
           id: task.id,
@@ -68,7 +69,6 @@ const Tasks: React.FC = () => {
           updated_at: task.updated_at,
         }));
         setTasks(mappedTasks);
-        console.log(mappedTasks);
       } else {
         throw new Error("Failed to fetch tasks");
       }
@@ -99,8 +99,14 @@ const Tasks: React.FC = () => {
     setSortOrder(order);
   };
 
-  const addTaskToList = (newTask: Task) => {
-    setTasks((prev) => [...prev, newTask]);
+  const openEditModal = (task: Task) => {
+    setSelectedTask(task);
+    setShowModal(true);
+  };
+
+  const closeEditModal = () => {
+    setSelectedTask(null);
+    setShowModal(false);
   };
 
   return (
@@ -135,7 +141,7 @@ const Tasks: React.FC = () => {
           </thead>
           <tbody>
             {tasks.map((task) => (
-              <tr key={task.id}>
+              <tr key={task.id} onClick={() => openEditModal(task)}>
                 <td>{task.title}</td>
                 <td>{task.description}</td>
                 <td>{task.priority}</td>
@@ -152,7 +158,7 @@ const Tasks: React.FC = () => {
                 </td>
                 <td>
                   {task.assigned_to ? (
-                    <div className="creator-infoo">
+                    <div className="creator-info">
                       <img
                         src={task.assigned_to.avatar || "/default-avatar.png"}
                         alt={task.assigned_to.name}
@@ -174,13 +180,21 @@ const Tasks: React.FC = () => {
           </tbody>
         </table>
       )}
-      <button className="create-task-button" onClick={() => setShowModal(true)}>
-        +
-      </button>
-      {showModal && (
-        <TaskModal
+      {showModal && selectedTask && (
+        <EditTaskModal
           teamId={teamId!}
-          onClose={() => setShowModal(false)}
+          taskId={selectedTask.id}
+          taskData={{
+            title: selectedTask.title,
+            description: selectedTask.description,
+            priority: selectedTask.priority,
+            status: selectedTask.status,
+            assigned_to: selectedTask.assigned_to
+              ? parseInt(selectedTask.assigned_to.name.split(" ")[0])
+              : null,
+            due_date: selectedTask.due_date,
+          }}
+          onClose={closeEditModal}
           onTaskUpdated={updateTasks}
         />
       )}

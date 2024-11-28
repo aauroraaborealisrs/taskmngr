@@ -53,11 +53,7 @@ router.post("/:teamId/members", authenticateToken, async (req, res) => {
   const { addUserId, role } = req.body as AddTeamMemberRequestBody; // userId пользователя, которого добавляем
   const currentUserId = req.body.userId; // ID текущего пользователя из токена
 
-  console.log(`Token userId: ${currentUserId}, Body userId: ${addUserId}`);
-
   try {
-    console.log(`Current user ID from token: ${currentUserId}`);
-    console.log(`Adding user ${addUserId} to team ${teamId} with role ${role}`);
 
     // Проверяем, существует ли текущий пользователь
     const currentUserCheck = await pool.query(
@@ -94,7 +90,6 @@ router.post("/:teamId/members", authenticateToken, async (req, res) => {
       [teamId, addUserId, role || "member"],
     );
 
-    console.log(`User ${addUserId} added to team ${teamId} as ${role}`);
     res.status(201).json({
       message: "Member added successfully",
       member: newMember.rows[0],

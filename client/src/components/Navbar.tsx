@@ -89,12 +89,6 @@ const Navbar: React.FC = () => {
           <Link to="/teams">Teams</Link>
         </li>
         <li>
-          <Link to="/profile">Profile</Link>
-        </li>
-        <li>
-          <Link to="/reports">Reports</Link>
-        </li>
-        <li>
           <Link to="/notifications">Notifications</Link>
         </li>
         <li>

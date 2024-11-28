@@ -58,9 +58,7 @@ router.get(
   "/:teamId/tasks",
   authenticateToken,
   async (req: Request, res: Response) => {
-    console.log("GET TASKS");
     const { teamId } = req.params;
-    console.log(teamId);
 
     try {
       const teamCheck = await pool.query("SELECT * FROM teams WHERE id = $1", [
@@ -108,7 +106,6 @@ router.get(
         tasks: tasks.rows,
       });
 
-      console.log(tasks);
     } catch (error) {
       console.error("Error fetching tasks:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -180,12 +177,45 @@ router.put(
         return res.status(400).json({ message: "No fields to update" });
       }
 
-      const query = `UPDATE tasks SET ${updates.join(", ")} WHERE id = $1 RETURNING *`;
+      const query = `UPDATE tasks SET ${updates.join(
+        ", "
+      )} WHERE id = $1 RETURNING *`;
       const updatedTask = await pool.query(query, values);
+
+      // Теперь возвращаем задачу с подробной информацией
+      const detailedTaskQuery = `
+        SELECT 
+          t.id,
+          t.title,
+          t.description,
+          t.priority,
+          t.status,
+          t.due_date,
+          t.created_at,
+          t.updated_at,
+          t.team_id,
+          json_build_object(
+            'name', u_creator.first_name || ' ' || u_creator.last_name,
+            'avatar', u_creator.avatar_url
+          ) AS creator,
+          CASE 
+            WHEN t.assigned_to IS NOT NULL THEN 
+              json_build_object(
+                'name', u_assigned.first_name || ' ' || u_assigned.last_name,
+                'avatar', u_assigned.avatar_url
+              )
+            ELSE NULL
+          END AS assigned_to
+        FROM tasks t
+        LEFT JOIN users u_creator ON t.creator_id = u_creator.id
+        LEFT JOIN users u_assigned ON t.assigned_to = u_assigned.id
+        WHERE t.id = $1
+      `;
+      const detailedTask = await pool.query(detailedTaskQuery, [taskId]);
 
       res.status(200).json({
         message: "Task updated successfully",
-        task: updatedTask.rows[0],
+        task: detailedTask.rows[0],
       });
     } catch (error) {
       console.error("Error updating task:", error);
@@ -193,6 +223,7 @@ router.put(
     }
   }
 );
+
 
 router.delete(
   "/:teamId/tasks/:taskId",
@@ -227,7 +258,6 @@ router.delete(
 );
 
 router.get("/:teamId", authenticateToken, async (req, res) => {
-  console.log("GET TEAM ID");
   const { teamId } = req.params;
 
   try {
@@ -242,8 +272,7 @@ router.get("/:teamId", authenticateToken, async (req, res) => {
 });
 
 router.get("/", authenticateToken, async (req, res) => {
-  console.log("GET SORT ID");
-
+  
   const { teamId, sortField = "created_at", sortOrder = "asc" } = req.query;
 
   if (!teamId) {
@@ -281,7 +310,6 @@ router.get("/", authenticateToken, async (req, res) => {
       `;
 
     const tasks = await pool.query(query, [teamId]);
-    console.log(tasks.rows);
     res.json({ tasks: tasks.rows });
   } catch (error) {
     console.error("Error fetching tasks:", error);

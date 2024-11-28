@@ -32,8 +32,6 @@ const Me: React.FC = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        // const token = localStorage.getItem("token");
-        // console.log(token);
         const rawToken = localStorage.getItem("token");
         const token = rawToken?.replace(/^"|"$/g, "");
         const response = await fetch("http://localhost:5000/update/me", {

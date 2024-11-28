@@ -30,7 +30,6 @@ const Teams: React.FC = () => {
 
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched teams:", data.teams);
           setTeams(data.teams); // Update state with teams
         } else {
           throw new Error("Failed to fetch teams");
@@ -67,7 +66,6 @@ const Teams: React.FC = () => {
       }
 
       const newTeam = await response.json();
-      console.log("New team created:", newTeam);
       setTeams((prevTeams) => [...prevTeams, newTeam.team]); // Update teams state
       setTeamName("");
       setDescription("");
@@ -79,8 +77,6 @@ const Teams: React.FC = () => {
       setLoading(false);
     }
   };
-
-  console.log(JSON.stringify(teams, null, 2));
 
   return (
     <div className="teams-container">

@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
 import "../styles/TaskModal.css";
 
-interface TaskModalProps {
+interface EditTaskModalProps {
   teamId: string;
+  taskId: number;
   onClose: () => void;
-  onTaskUpdated: () => void; // Обновление задач в родительском компоненте
+  onTaskUpdated: () => void; // Callback для обновления задач в родительском компоненте
+  taskData: {
+    title: string;
+    description: string;
+    priority: string;
+    status: string;
+    assigned_to: number | null;
+    due_date: string | null;
+  };
 }
 
 interface TeamMember {
@@ -12,15 +21,14 @@ interface TeamMember {
   username: string;
 }
 
-const TaskModal: React.FC<TaskModalProps> = ({ teamId, onClose, onTaskUpdated }) => {
-  const [newTask, setNewTask] = useState({
-    title: "",
-    description: "",
-    priority: "normal",
-    status: "todo",
-    assigned_to: "",
-    due_date: "",
-  });
+const EditTaskModal: React.FC<EditTaskModalProps> = ({
+  teamId,
+  taskId,
+  onClose,
+  onTaskUpdated,
+  taskData,
+}) => {
+  const [updatedTask, setUpdatedTask] = useState(taskData); // Используем переданные данные задачи
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   // Fetch team members
@@ -55,83 +63,71 @@ const TaskModal: React.FC<TaskModalProps> = ({ teamId, onClose, onTaskUpdated })
     fetchTeamMembers();
   }, [teamId]);
 
-  const handleNewTaskChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleTaskChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setNewTask({ ...newTask, [name]: value });
+    setUpdatedTask({ ...updatedTask, [name]: value });
   };
 
-  const createTask = async () => {
+  const saveTask = async () => {
     const rawToken = localStorage.getItem("token");
     const token = rawToken?.replace(/^"|"$/g, ""); // Убираем кавычки из токена
 
     try {
-      const response = await fetch(`http://localhost:5000/tasks/${teamId}/tasks`, {
-        method: "POST",
+      const response = await fetch(`http://localhost:5000/tasks/${teamId}/tasks/${taskId}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          title: newTask.title,
-          description: newTask.description,
-          priority: newTask.priority,
-          due_date: newTask.due_date,
-          assigned_to: newTask.assigned_to || null, // Назначенный пользователь (если есть)
+          ...updatedTask,
+          assigned_to: updatedTask.assigned_to || null, // Назначенный пользователь
         }),
       });
 
-      let a = JSON.stringify({
-        title: newTask.title,
-        description: newTask.description,
-        priority: newTask.priority,
-        due_date: newTask.due_date,
-        assigned_to: newTask.assigned_to || null, // Назначенный пользователь (если есть)
-      })
-      
       if (response.ok) {
-        // Обновляем задачи
-        onTaskUpdated();
+        onTaskUpdated(); // Обновляем список задач
         onClose(); // Закрываем модалку
       } else {
-        throw new Error("Failed to create task");
+        throw new Error("Failed to update task");
       }
     } catch (err) {
-      console.error("Error creating task:", err);
+      console.error("Error updating task:", err);
     }
   };
 
   return (
     <div className="modal">
       <div className="modal-content">
-        <h2>Create New Task</h2>
+        <h2>Edit Task</h2>
         <input
           type="text"
           name="title"
           placeholder="Title"
-          value={newTask.title}
-          onChange={handleNewTaskChange}
+          value={updatedTask.title}
+          onChange={handleTaskChange}
           required
         />
         <textarea
           name="description"
           placeholder="Description"
-          value={newTask.description}
-          onChange={handleNewTaskChange}
+          value={updatedTask.description || ""}
+          onChange={handleTaskChange}
         ></textarea>
-        <select name="priority" value={newTask.priority} onChange={handleNewTaskChange}>
+        <select name="priority" value={updatedTask.priority} onChange={handleTaskChange}>
           <option value="low">Low</option>
           <option value="normal">Normal</option>
           <option value="high">High</option>
         </select>
-        <select name="status" value={newTask.status} onChange={handleNewTaskChange}>
+        <select name="status" value={updatedTask.status} onChange={handleTaskChange}>
           <option value="todo">To Do</option>
           <option value="in_progress">In Progress</option>
           <option value="completed">Completed</option>
         </select>
         <select
           name="assigned_to"
-          value={newTask.assigned_to}
-          onChange={handleNewTaskChange}
+          value={updatedTask.assigned_to || ""}
+          onChange={handleTaskChange}
         >
           <option value="">Unassigned</option>
           {teamMembers.map((member) => (
@@ -143,14 +139,14 @@ const TaskModal: React.FC<TaskModalProps> = ({ teamId, onClose, onTaskUpdated })
         <input
           type="date"
           name="due_date"
-          value={newTask.due_date}
-          onChange={handleNewTaskChange}
+          value={updatedTask.due_date || ""}
+          onChange={handleTaskChange}
         />
-        <button onClick={createTask}>Create</button>
+        <button onClick={saveTask}>Save</button>
         <button onClick={onClose}>Cancel</button>
       </div>
     </div>
   );
 };
 
-export default TaskModal;
+export default EditTaskModal;

@@ -17,7 +17,6 @@ export const testConnection = async () => {
     const res = await pool.query("SELECT NOW()");
     console.log("Database connected:", res.rows[0].now);
   } catch (err: unknown) {
-    console.log(pool);
     if (typeof err === "object" && err !== null && "message" in err) {
       console.error("Database connection error:", err.message);
     }

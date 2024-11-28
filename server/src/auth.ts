@@ -59,7 +59,7 @@ router.post(
       const token = jwt.sign(
         { id: newUser.rows[0].id, username: newUser.rows[0].username },
         JWT_SECRET,
-        { expiresIn: "24h" }, // Токен действует 1 час
+        { expiresIn: "7d" }, // Токен действует 1 час
       );
 
       // Возвращаем токен и данные пользователя
@@ -105,7 +105,7 @@ router.post(
 
       // Генерируем JWT
       const token = jwt.sign({ id: user.rows[0].id, email }, JWT_SECRET, {
-        expiresIn: "1h",
+        expiresIn: "7d",
       });
 
       res.status(200).json({
