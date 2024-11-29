@@ -11,6 +11,7 @@ import Navbar from "./components/Navbar";
 import PomodoroTimer from "./components/PomodoroTimer";
 
 import "./App.css";
+import Notifications from "./components/Notifications";
 
 
 const Layout: React.FC = () => {
@@ -37,6 +38,7 @@ const App: React.FC = () => {
           <Route path="pomodoro" element={<PomodoroTimer />} />
           <Route path="teams" element={<Teams />} />
           <Route path="tasks" element={<Tasks />} />
+          <Route path="notifications" element={<Notifications />} />
           <Route path="/tasks/:teamId" element={<Tasks />} />
         </Route>
 

@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import pool from "../db.js";
 import { authenticateToken } from "../authMiddleware.js";
+import { notifyUser } from "../websocket.js";
 
 const router = express.Router();
 
@@ -42,11 +43,22 @@ router.post(
           teamId,
           assigned_to || null,
         ]
-      );      
+      );
+
+      const createdTask = newTask.rows[0];
+
+      if (assigned_to) {
+        console.log("assigned_to");
+        notifyUser(assigned_to.toString(), "task_assigned", {
+          taskId: createdTask.id,
+          title: createdTask.title,
+          message: "You have been assigned a new task.",
+        });
+      }
 
       res.status(201).json({
         message: "Task created successfully",
-        task: newTask.rows[0],
+        task: createdTask,
       });
     } catch (error) {
       console.error("Error creating task:", error);
@@ -106,7 +118,6 @@ router.get(
         message: "Tasks fetched successfully",
         tasks: tasks.rows,
       });
-
     } catch (error) {
       console.error("Error fetching tasks:", error);
       res.status(500).json({ message: "Internal server error" });
@@ -225,7 +236,6 @@ router.put(
   }
 );
 
-
 router.delete(
   "/:teamId/tasks/:taskId",
   authenticateToken,
@@ -273,7 +283,6 @@ router.get("/:teamId", authenticateToken, async (req, res) => {
 });
 
 router.get("/", authenticateToken, async (req, res) => {
-  
   const { teamId, sortField = "created_at", sortOrder = "asc" } = req.query;
 
   if (!teamId) {
@@ -318,31 +327,68 @@ router.get("/", authenticateToken, async (req, res) => {
   }
 });
 
-router.patch("/:taskId", authenticateToken, async (req: Request, res: Response) => {
-  const { taskId } = req.params;
-  const { status } = req.body;
+router.patch(
+  "/:taskId",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    const { taskId } = req.params;
+    const { status } = req.body;
 
-  // Проверяем, что статус является допустимым
-  if (!["todo", "in progress", "completed"].includes(status)) {
-    return res.status(400).json({ message: "Invalid status" });
-  }
-
-  try {
-    const updatedTask = await pool.query(
-      `UPDATE tasks SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *`,
-      [status, taskId]
-    );
-
-    if (updatedTask.rowCount === 0) {
-      return res.status(404).json({ message: "Task not found" });
+    // Проверяем, что статус является допустимым
+    if (!["todo", "in progress", "completed"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status" });
     }
 
-    res.status(200).json(updatedTask.rows[0]);
-  } catch (error) {
-    console.error("Error updating task:", error);
-    res.status(500).json({ message: "Internal server error" });
+    try {
+      const updatedTask = await pool.query(
+        `UPDATE tasks SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *`,
+        [status, taskId]
+      );
+
+      if (updatedTask.rowCount === 0) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      res.status(200).json(updatedTask.rows[0]);
+    } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
   }
-});
+);
+
+router.get(
+  "/:teamId/assigned",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    const { teamId } = req.params; // Получаем teamId из параметров маршрута
+    const userId = req.body.userId ; // Берем userId из токена через authenticateToken
+
+    try {
+      // Проверяем, существует ли команда
+      const teamCheck = await pool.query("SELECT * FROM teams WHERE id = $1", [
+        teamId,
+      ]);
+      if (teamCheck.rows.length === 0) {
+        return res.status(404).json({ message: "Team not found" });
+      }
+
+      // Получаем задачи, назначенные на пользователя
+      const assignedTasks = await pool.query(
+        "SELECT * FROM tasks WHERE team_id = $1 AND assigned_to = $2 ORDER BY created_at DESC",
+        [teamId, userId]
+      );
+
+      res.status(200).json({
+        message: "Assigned tasks fetched successfully",
+        tasks: assignedTasks.rows,
+      });
+    } catch (error) {
+      console.error("Error fetching assigned tasks:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  }
+);
 
 
 export default router;
