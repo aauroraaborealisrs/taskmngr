@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CreateTeam from "./CreateTeam";
+import "../styles/Teams.css";
 
 interface Team {
   team_id: number;
@@ -9,16 +10,13 @@ interface Team {
 
 const Teams: React.FC = () => {
   const [teams, setTeams] = useState<Team[]>([]);
-  const [teamName, setTeamName] = useState("");
-  const [description, setDescription] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isCreateTeamVisible, setIsCreateTeamVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch teams on component mount
   useEffect(() => {
     const fetchTeams = async () => {
       const rawToken = localStorage.getItem("token");
-      const token = rawToken?.replace(/^"|"$/g, ""); // Sanitize token
+      const token = rawToken?.replace(/^"|"$/g, "");
 
       try {
         const response = await fetch("http://localhost:5000/team", {
@@ -30,7 +28,7 @@ const Teams: React.FC = () => {
 
         if (response.ok) {
           const data = await response.json();
-          setTeams(data.teams); // Update state with teams
+          setTeams(data.teams);
         } else {
           throw new Error("Failed to fetch teams");
         }
@@ -43,39 +41,8 @@ const Teams: React.FC = () => {
     fetchTeams();
   }, []);
 
-  // Handle creating a new team
-  const handleCreateTeam = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/team", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ name: teamName, description }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create team");
-      }
-
-      const newTeam = await response.json();
-      setTeams((prevTeams) => [...prevTeams, newTeam.team]); // Update teams state
-      setTeamName("");
-      setDescription("");
-      alert("Team created successfully!");
-    } catch (err) {
-      console.error("Create error:", err);
-      setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally {
-      setLoading(false);
-    }
+  const toggleCreateTeam = () => {
+    setIsCreateTeamVisible((prev) => !prev);
   };
 
   return (
@@ -92,7 +59,7 @@ const Teams: React.FC = () => {
           <ul className="teams-list">
             {teams.map((team) => (
               <li key={team.team_id} className="team-item">
-                <div className="team-details">
+                <div className="team-details column">
                   <span className="team-name">{team.team_name}</span>
                   <span className="team-role">Role: {team.user_role}</span>
                 </div>
@@ -102,8 +69,13 @@ const Teams: React.FC = () => {
         )}
       </div>
 
-      <h2>Create a New Team</h2>
-      <CreateTeam />
+      {/* Кнопка для открытия CreateTeam */}
+      <button className="create-task-button" onClick={toggleCreateTeam}>
+        +
+      </button>
+
+      {/* Отображение CreateTeam по состоянию */}
+      {isCreateTeamVisible && <CreateTeam />}
     </div>
   );
 };

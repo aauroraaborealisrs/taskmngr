@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Select from "react-select";
 import "../styles/Navbar.css";
 
 interface Team {
@@ -9,16 +10,15 @@ interface Team {
 
 const Navbar: React.FC = () => {
   const [teams, setTeams] = useState<Team[]>([]);
-  const [selectedTeam, setSelectedTeam] = useState<string>(
-    localStorage.getItem("selectedTeamId") || "" // Изначально берем из localStorage
+  const [selectedTeam, setSelectedTeam] = useState<Team | null>(
+    JSON.parse(localStorage.getItem("selectedTeam") || "null")
   );
   const navigate = useNavigate();
 
-  // Fetch списка команд при загрузке Navbar
   useEffect(() => {
     const fetchTeams = async () => {
       const rawToken = localStorage.getItem("token");
-      const token = rawToken?.replace(/^"|"$/g, ""); // Убираем кавычки
+      const token = rawToken?.replace(/^"|"$/g, "");
 
       try {
         const response = await fetch("http://localhost:5000/team", {
@@ -30,14 +30,13 @@ const Navbar: React.FC = () => {
 
         if (response.ok) {
           const data = await response.json();
-          setTeams(data.teams || []); // Добавляем команды в состояние
+          setTeams(data.teams || []);
 
-          // Если в localStorage нет выбранной команды, устанавливаем первую
           if (!selectedTeam && data.teams.length > 0) {
-            const defaultTeamId = data.teams[0].team_id.toString();
-            setSelectedTeam(defaultTeamId);
-            localStorage.setItem("selectedTeamId", defaultTeamId); // Сохраняем в localStorage
-            navigate(`/tasks/${defaultTeamId}`);
+            const defaultTeam = data.teams[0];
+            setSelectedTeam(defaultTeam);
+            localStorage.setItem("selectedTeam", JSON.stringify(defaultTeam));
+            navigate(`/tasks/${defaultTeam.team_id}`);
           }
         } else {
           throw new Error("Failed to fetch teams");
@@ -50,11 +49,44 @@ const Navbar: React.FC = () => {
     fetchTeams();
   }, [selectedTeam, navigate]);
 
-  const handleTeamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const teamId = e.target.value;
-    setSelectedTeam(teamId);
-    localStorage.setItem("selectedTeamId", teamId); // Сохраняем в localStorage
-    navigate(`/tasks/${teamId}`); // Редирект на задачи выбранной команды
+  const handleTeamChange = (selectedOption: Team | null) => {
+    setSelectedTeam(selectedOption);
+
+    if (selectedOption) {
+      let teamId = selectedOption?.team_id.toString();
+      localStorage.setItem("selectedTeamId", teamId);
+      navigate(`/tasks/${selectedOption.team_id}`);
+    }
+  };
+
+  const customStyles = {
+    option: (provided: any, state: any) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? "#498205" : "#fff",
+      color: state.isSelected ? "#fff" : "#333",
+      fontSize: "16px",
+      "&:hover": {
+        backgroundColor: "#f4f4f4",
+        color: "#000",
+      },
+    }),
+    singleValue: (provided: any, state: any) => ({
+      ...provided,
+
+      fontSize: "16px",
+    }),
+    control: (provided: any) => ({
+      ...provided,
+      borderColor: "#ddd",
+      boxShadow: "none",
+      "&:hover": {
+        borderColor: "#aaa",
+      },
+    }),
+    menu: (provided: any) => ({
+      ...provided,
+      zIndex: 100,
+    }),
   };
 
   return (
@@ -65,19 +97,16 @@ const Navbar: React.FC = () => {
 
       <div className="sidebar-team-select">
         <div className="column custom-select-wrapper">
-        <label htmlFor="team-select">Select Team:</label>
-        <select
-          id="team-select"
-          value={selectedTeam}
-          onChange={handleTeamChange}
-          className="team-select custom-select"
-        >
-          {teams.map((team) => (
-            <option key={team.team_id} value={team.team_id}>
-              {team.team_name}
-            </option>
-          ))}
-        </select>
+          <label htmlFor="team-select">Select Team:</label>
+          <Select
+            options={teams}
+            getOptionLabel={(e) => e.team_name}
+            getOptionValue={(e) => e.team_id.toString()}
+            value={selectedTeam}
+            onChange={handleTeamChange}
+            placeholder="Select your team..."
+            styles={customStyles}
+          />
         </div>
       </div>
 
@@ -96,6 +125,9 @@ const Navbar: React.FC = () => {
         </li>
         <li>
           <Link to="/pomodoro">Pomodoro</Link>
+        </li>
+        <li>
+          <Link to="/dashboard">Dashboard</Link>
         </li>
       </ul>
 

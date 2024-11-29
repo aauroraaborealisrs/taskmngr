@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import Select from "react-select";
+import "../styles/Teams.css";
 
 interface User {
   id: number;
@@ -14,7 +16,6 @@ interface TeamMember {
 const CreateTeam: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<TeamMember[]>([]);
-  const [search, setSearch] = useState("");
   const [teamName, setTeamName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -44,27 +45,40 @@ const CreateTeam: React.FC = () => {
     fetchUsers();
   }, []);
 
-  // Фильтрация пользователей по поисковому запросу
-  const filteredUsers = users.filter((user) =>
-    user.username.toLowerCase().includes(search.toLowerCase()),
-  );
-
-  // Добавление пользователя в выбранных участников
   const addUser = (user: User) => {
     if (!selectedUsers.some((member) => member.id === user.id)) {
-      setSelectedUsers([
-        ...selectedUsers,
+      setSelectedUsers((prev) => [
+        ...prev,
         { id: user.id, username: user.username },
       ]);
     }
   };
 
-  // Удаление пользователя из выбранных участников
   const removeUser = (id: number) => {
-    setSelectedUsers(selectedUsers.filter((member) => member.id !== id));
+    setSelectedUsers((prev) => prev.filter((member) => member.id !== id));
   };
 
-  // Создание команды
+  const customOption = (props: any) => {
+    const { data, innerRef, innerProps } = props;
+    return (
+      <div ref={innerRef} {...innerProps} className="custom-option">
+        <span>
+          {data.username} ({data.email})
+        </span>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            addUser(data);
+          }}
+          className="add-user-button"
+        >
+          Add
+        </button>
+      </div>
+    );
+  };
+
   const handleCreateTeam = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -88,7 +102,6 @@ const CreateTeam: React.FC = () => {
 
       const data = await response.json();
 
-      // Добавление участников в созданную команду
       for (const member of selectedUsers) {
         await fetch(`http://localhost:5000/team/${data.team.id}/members`, {
           method: "POST",
@@ -114,53 +127,51 @@ const CreateTeam: React.FC = () => {
     <div className="create-team-container">
       <h1>Create a New Team</h1>
       <form onSubmit={handleCreateTeam}>
-        <div>
+        <div className="column teams-cont">
           <label>Team Name</label>
           <input
             type="text"
             value={teamName}
             onChange={(e) => setTeamName(e.target.value)}
             required
+            className="css-13cymwt-control teams-input"
           />
         </div>
-        <div>
-          <label>Search Users</label>
-          <input
-            type="text"
-            placeholder="Search by username"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+        <div className="teams-cont">
+          <label>Search and Add Users</label>
+          <Select
+            options={users}
+            getOptionLabel={(e) => e.username}
+            getOptionValue={(e) => e.id.toString()}
+            components={{ Option: customOption }}
+            placeholder="Search for users..."
           />
         </div>
-        <div className="user-list">
-          <h2>Available Users</h2>
-          <ul>
-            {filteredUsers.map((user) => (
-              <li key={user.id}>
-                {user.username} ({user.email})
-                <button type="button" onClick={() => addUser(user)}>
-                  Add
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="selected-users">
-          <h2>Selected Members</h2>
-          <ul>
-            {selectedUsers.map((member) => (
-              <li key={member.id}>
-                {member.username}
-                <button type="button" onClick={() => removeUser(member.id)}>
-                  Remove
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Team"}
-        </button>
+
+        {selectedUsers.length > 0 && (
+          <>
+            <div className="selected-users">
+              <h2>Selected Members</h2>
+              <ul>
+                {selectedUsers.map((member) => (
+                  <li key={member.id}>
+                    {member.username}
+                    <button
+                      type="button"
+                      onClick={() => removeUser(member.id)}
+                      className="teams-btn"
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <button type="submit" disabled={loading} className="teams-btn">
+              {loading ? "Creating..." : "Create Team"}
+            </button>
+          </>
+        )}
       </form>
     </div>
   );

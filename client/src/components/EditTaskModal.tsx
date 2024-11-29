@@ -5,7 +5,7 @@ interface EditTaskModalProps {
   teamId: string;
   taskId: number;
   onClose: () => void;
-  onTaskUpdated: () => void; // Callback для обновления задач в родительском компоненте
+  onTaskUpdated: () => void; 
   taskData: {
     title: string;
     description: string;
@@ -28,11 +28,11 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   onTaskUpdated,
   taskData,
 }) => {
-  const [updatedTask, setUpdatedTask] = useState(taskData); // Используем переданные данные задачи
+  const [updatedTask, setUpdatedTask] = useState(taskData); 
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [isEditMode, setIsEditMode] = useState(false); // Режим редактирования
+  const [isEditMode, setIsEditMode] = useState(false); 
 
-  // Fetch team members
+  
   useEffect(() => {
     const fetchTeamMembers = async () => {
       const rawToken = localStorage.getItem("token");
@@ -71,7 +71,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
 
   const saveTask = async () => {
     const rawToken = localStorage.getItem("token");
-    const token = rawToken?.replace(/^"|"$/g, ""); // Убираем кавычки из токена
+    const token = rawToken?.replace(/^"|"$/g, ""); 
 
     try {
       const response = await fetch(`http://localhost:5000/tasks/${teamId}/tasks/${taskId}`, {
@@ -82,13 +82,13 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         },
         body: JSON.stringify({
           ...updatedTask,
-          assigned_to: updatedTask.assigned_to || null, // Назначенный пользователь
+          assigned_to: updatedTask.assigned_to || null, 
         }),
       });
 
       if (response.ok) {
-        onTaskUpdated(); // Обновляем список задач
-        onClose(); // Закрываем модалку
+        onTaskUpdated(); 
+        onClose(); 
       } else {
         throw new Error("Failed to update task");
       }
