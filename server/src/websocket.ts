@@ -46,6 +46,7 @@ export const initializeWebSocketServer = (server: any) => {
                       id: newMessage.rows[0].id,
                       content: newMessage.rows[0].content,
                       sender: userId,
+                      teamId, // Добавляем teamId, чтобы клиенты могли фильтровать сообщения
                       created_at: newMessage.rows[0].created_at,
                     },
                   })

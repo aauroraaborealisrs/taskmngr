@@ -44,35 +44,50 @@ const TeamChat: React.FC = () => {
 
   useEffect(() => {
     if (!ws) return;
-
+  
     ws.onmessage = (event) => {
       const { event: eventType, data } = JSON.parse(event.data);
-
+  
       if (eventType === "new_message" && data.teamId === teamId) {
         setMessages((prev) => [...prev, data]);
       }
     };
-
+  
     return () => {
       if (ws) ws.onmessage = null;
     };
   }, [ws, teamId]);
+  
 
   const sendMessage = () => {
-    if (!ws || !input.trim()) return;
-
-    ws.send(
-      JSON.stringify({
-        event: "send_message",
-        data: {
-          teamId,
-          content: input,
-        },
-      })
-    );
-
+    if (!ws || !input.trim() || !teamId) return;
+  
+    // Создаем объект сообщения
+    const messageData = {
+      event: "send_message",
+      data: {
+        teamId,
+        content: input,
+      },
+    };
+  
+    // // Добавляем сообщение в состояние (оптимистичное обновление)
+    // setMessages((prev) => [
+    //   ...prev,
+    //   {
+    //     id: Date.now(), // Генерируем временный ID (потом можно заменить)
+    //     content: input,
+    //     sender: "You", // Замените на реальное имя пользователя, если нужно
+    //     created_at: new Date().toISOString(),
+    //   },
+    // ]);
+  
+    // Отправляем сообщение через WebSocket
+    ws.send(JSON.stringify(messageData));
+  
+    // Очищаем поле ввода
     setInput("");
-  };
+  };  
 
   return (
     <div>

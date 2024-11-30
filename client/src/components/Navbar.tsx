@@ -129,6 +129,9 @@ const Navbar: React.FC = () => {
         <li>
           <Link to="/dashboard">Dashboard</Link>
         </li>
+        <li>
+          <Link to="/chat">Chats</Link>
+        </li>
       </ul>
 
       <div className="sidebar-actions">
