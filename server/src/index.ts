@@ -8,6 +8,7 @@ import teamRoutes from "./routes/teamRoutes.js";
 import usersRoutes from "./routes/usersRoutes.js";
 import tasksRoutes from "./routes/tasksRoutes.js";
 import { initializeWebSocketServer } from "./websocket.js";
+import chatRoutes from "./routes/chatRoutes.js";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/update", UpdateRoutes);
 app.use("/team", teamRoutes);
 app.use("/users", usersRoutes);
 app.use("/tasks", tasksRoutes);
+app.use("/chat", chatRoutes);
 
 const server = http.createServer(app);
 
