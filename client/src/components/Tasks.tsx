@@ -155,25 +155,25 @@ const Tasks: React.FC = () => {
 
   return (
     <div className="tasks-container">
-      <h1>Tasks for team</h1>
+      <h1>Задания для команды</h1>
       <div className="view-switch">
         <button
           className="view-switch-btn"
           onClick={() => setViewMode("table")}
         >
-          Table
+          Таблица
         </button>
         <button
           className="view-switch-btn"
           onClick={() => setViewMode("calendar")}
         >
-          Calendar
+          Календарь
         </button>
         <button
           className="view-switch-btn"
           onClick={() => setViewMode("kanban")}
         >
-          Kanban
+          Доска
         </button>
       </div>
       {viewMode === "table" ? (
@@ -186,25 +186,25 @@ const Tasks: React.FC = () => {
                 <thead>
                   <tr>
                     <th onClick={() => sortTasks("title")}>
-                      Title{" "}
+                      Название{" "}
                       {sortField === "title" &&
                         (sortOrder === "asc" ? "↑" : "↓")}
                     </th>
-                    <th>Description</th>
+                    <th>Описание</th>
                     <th onClick={() => sortTasks("priority")}>
-                      Priority{" "}
+                      Приоритет{" "}
                       {sortField === "priority" &&
                         (sortOrder === "asc" ? "↑" : "↓")}
                     </th>
                     <th onClick={() => sortTasks("status")}>
-                      Status{" "}
+                      Статус{" "}
                       {sortField === "status" &&
                         (sortOrder === "asc" ? "↑" : "↓")}
                     </th>
-                    <th>Creator</th>
-                    <th>Assigned To</th>
+                    <th>Создано</th>
+                    <th>Назначено</th>
                     <th onClick={() => sortTasks("due_date")}>
-                      Due Date{" "}
+                      Выполнить до{" "}
                       {sortField === "due_date" &&
                         (sortOrder === "asc" ? "↑" : "↓")}
                     </th>
@@ -244,13 +244,13 @@ const Tasks: React.FC = () => {
                             <span>{task.assigned_to.name}</span>
                           </div>
                         ) : (
-                          "Unassigned"
+                          "Никому не назначено"
                         )}
                       </td>
                       <td>
                         {task.due_date
                           ? new Date(task.due_date).toLocaleDateString()
-                          : "No deadline"}
+                          : "Не указано"}
                       </td>
                     </tr>
                   ))}
@@ -262,7 +262,7 @@ const Tasks: React.FC = () => {
                   onClick={() => setCurrentPage((prev) => prev - 1)}
                   className="view-switch-btn"
                 >
-                  Previous
+                  Предыдущая
                 </button>
                 <span>
                   Page {currentPage} of {totalPages}
@@ -272,7 +272,7 @@ const Tasks: React.FC = () => {
                   onClick={() => setCurrentPage((prev) => prev + 1)}
                   className="view-switch-btn"
                 >
-                  Next
+                  Следующая
                 </button>
               </div>
             </>

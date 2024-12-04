@@ -97,7 +97,7 @@ const Navbar: React.FC = () => {
 
       <div className="sidebar-team-select">
         <div className="column custom-select-wrapper">
-          <label htmlFor="team-select">Select Team:</label>
+          <label htmlFor="team-select">Выберите команду:</label>
           <Select
             options={teams}
             getOptionLabel={(e) => e.team_name}
@@ -112,25 +112,25 @@ const Navbar: React.FC = () => {
 
       <ul className="sidebar-links">
         <li>
-          <Link to="/tasks">Tasks</Link>
+          <Link to="/tasks">Задания</Link>
         </li>
         <li>
-          <Link to="/teams">Teams</Link>
+          <Link to="/teams">Команды</Link>
         </li>
         <li>
-          <Link to="/notifications">Notifications</Link>
+          <Link to="/notifications">Уведомления</Link>
         </li>
         <li>
-          <Link to="/me">Me</Link>
+          <Link to="/me">Мой аккаунт</Link>
         </li>
         <li>
-          <Link to="/pomodoro">Pomodoro</Link>
+          <Link to="/pomodoro">Таймер</Link>
         </li>
         <li>
-          <Link to="/dashboard">Dashboard</Link>
+          <Link to="/dashboard">Статистика</Link>
         </li>
         <li>
-          <Link to="/chat">Chats</Link>
+          <Link to="/chat">Чат</Link>
         </li>
       </ul>
 

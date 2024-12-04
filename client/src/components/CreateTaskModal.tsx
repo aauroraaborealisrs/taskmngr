@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import ReactMde from "react-mde";
+import "react-mde/lib/styles/css/react-mde-all.css"; // Стили для редактора
 import "../styles/CreateTaskModal.css";
 
 interface CreateTaskModalProps {
   teamId: string;
   onClose: () => void;
-  onTaskUpdated: () => void; // Обновление задач в родительском компоненте
+  onTaskUpdated: () => void;
 }
 
 interface TeamMember {
@@ -21,6 +24,7 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ teamId, onClose, onTa
     assigned_to: "",
     due_date: "",
   });
+  const [selectedTab, setSelectedTab] = useState<"write" | "preview">("write");
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
 
   // Fetch team members
@@ -55,17 +59,18 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ teamId, onClose, onTa
     fetchTeamMembers();
   }, [teamId]);
 
-  const handleNewTaskChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
+  const handleNewTaskChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setNewTask({ ...newTask, [name]: value });
   };
-  
+
+  const handleMarkdownChange = (value: string) => {
+    setNewTask({ ...newTask, description: value });
+  };
 
   const createTask = async () => {
     const rawToken = localStorage.getItem("token");
-    const token = rawToken?.replace(/^"|"$/g, ""); // Убираем кавычки из токена
+    const token = rawToken?.replace(/^"|"$/g, "");
 
     try {
       const response = await fetch(`http://localhost:5000/tasks/${teamId}/tasks`, {
@@ -80,25 +85,13 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ teamId, onClose, onTa
           priority: newTask.priority,
           status: newTask.status,
           due_date: newTask.due_date,
-          assigned_to: newTask.assigned_to || null, // Назначенный пользователь (если есть)
+          assigned_to: newTask.assigned_to || null,
         }),
       });
 
-      let a = JSON.stringify({
-        title: newTask.title,
-        description: newTask.description,
-        priority: newTask.priority,
-        status: newTask.status,
-        due_date: newTask.due_date,
-        assigned_to: newTask.assigned_to || null, // Назначенный пользователь (если есть)
-      })
-
-      console.log(a);
-      
       if (response.ok) {
-        // Обновляем задачи
         onTaskUpdated();
-        onClose(); // Закрываем модалку
+        onClose();
       } else {
         throw new Error("Failed to create task");
       }
@@ -119,12 +112,15 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ teamId, onClose, onTa
           onChange={handleNewTaskChange}
           required
         />
-        <textarea
-          name="description"
-          placeholder="Description"
+        <ReactMde
           value={newTask.description}
-          onChange={handleNewTaskChange}
-        ></textarea>
+          onChange={handleMarkdownChange}
+          selectedTab={selectedTab}
+          onTabChange={setSelectedTab}
+          generateMarkdownPreview={(markdown) =>
+            Promise.resolve(<ReactMarkdown>{markdown}</ReactMarkdown>)
+          }
+        />
         <select name="priority" value={newTask.priority} onChange={handleNewTaskChange}>
           <option value="low">Low</option>
           <option value="normal">Normal</option>
@@ -135,12 +131,8 @@ const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ teamId, onClose, onTa
           <option value="in progress">In Progress</option>
           <option value="completed">Completed</option>
         </select>
-        <select
-          name="assigned_to"
-          value={newTask.assigned_to}
-          onChange={handleNewTaskChange}
-        >
-          <option value="">Unassigned</option>
+        <select name="assigned_to" value={newTask.assigned_to} onChange={handleNewTaskChange}>
+          <option value="">Никому не назначено</option>
           {teamMembers.map((member) => (
             <option key={member.id} value={member.id}>
               {member.username}

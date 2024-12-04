@@ -44,8 +44,8 @@ const Login: React.FC = () => {
         // Сохраняем токен и данные пользователя в Local Storage
         saveToLocalStorage("token", result.token);
         saveToLocalStorage("user", result.user);
+        navigate("/")
 
-        alert("Login successful!");
       } else {
         const error = await response.json();
         alert(`Login failed: ${error.message}`);

@@ -79,12 +79,12 @@ const Dashboard: React.FC = () => {
     ).length;
 
     return {
-      labels: ["To Do", "In Progress", "Completed"],
+      labels: ["Выполнить", "В процессе", "Выполнено"],
       datasets: [
         {
           data: [todo, inProgress, completed],
-          backgroundColor: ["#ff6384", "#36a2eb", "#4caf50"],
-          hoverBackgroundColor: ["#ff6384", "#36a2eb", "#4caf50"],
+          backgroundColor: ["#A888B5", "#e8d174", "#9ed670"],
+          // hoverBackgroundColor: ["#A888B5", "#36a2eb", "#4caf50"],
         },
       ],
     };
@@ -92,6 +92,16 @@ const Dashboard: React.FC = () => {
 
   const getTasksByUserData = () => {
     const users: Record<string, number> = {};
+    const colors = [
+      "#EFB6C8", // pink
+      "#8174A0", // purple-c
+      "#A888B5", // purple-w
+      "#4d7358", // green
+      "#9ed670", // green-l
+      "#d64d4d", // red
+      "#e39e54", // orange
+      "#e8d174", // yellow
+    ];
 
     tasks.forEach((task) => {
       if (task.assigned_to && task.assigned_to.name) {
@@ -100,13 +110,19 @@ const Dashboard: React.FC = () => {
       }
     });
 
+    // Map users to colors
+    const userLabels = Object.keys(users);
+    const backgroundColors = userLabels.map(
+      (_, index) => colors[index % colors.length]
+    );
+
     return {
-      labels: Object.keys(users),
+      labels: userLabels,
       datasets: [
         {
-          label: "Tasks Assigned",
+          label: "Назначенные задания",
           data: Object.values(users),
-          backgroundColor: "#2196f3",
+          backgroundColor: backgroundColors,
         },
       ],
     };
@@ -123,11 +139,11 @@ const Dashboard: React.FC = () => {
     const onTime = tasks.length - overdue;
 
     return {
-      labels: ["On Time", "Overdue"],
+      labels: ["Вовремя", "Просрочено"],
       datasets: [
         {
           data: [onTime, overdue],
-          backgroundColor: ["#4caf50", "#f44336"],
+          backgroundColor: ["#9ed670", "#e39e54"],
         },
       ],
     };
@@ -139,12 +155,12 @@ const Dashboard: React.FC = () => {
     const high = tasks.filter((task) => task.priority === "high").length;
 
     return {
-      labels: ["Low", "Normal", "High"],
+      labels: ["Низкий", "Нормальный", "Высокий"],
       datasets: [
         {
-          label: "Tasks by Priority",
+          label: "Задачи",
           data: [low, normal, high],
-          backgroundColor: ["#2196f3", "#ff9800", "#f44336"],
+          backgroundColor: ["#e8d174", "#4d7358", "#d64d4d"],
         },
       ],
     };
@@ -155,43 +171,66 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-container">
-      <h1>Dashboard</h1>
-
-      <div className="dashboard-cards">
-        <div className="card">
-          <h3>Total Tasks</h3>
-          <p>{tasks.length}</p>
+      <h1>Статистика</h1>
+      <div className="top-cont">
+        <div className="v-cont">
+          <div className="dashboard-cards">
+            <div className="card">
+              <h3>Все задания</h3>
+              <p>{tasks.length}</p>
+            </div>
+            <div className="card">
+              <h3>Выполнены</h3>
+              <p>
+                {tasks.filter((task) => task.status === "completed").length}
+              </p>
+            </div>
+            <div className="card">
+              <h3>В процессе</h3>
+              <p>
+                {tasks.filter((task) => task.status === "in progress").length}
+              </p>
+            </div>
+            <div className="card">
+              <h3>Выполнить</h3>
+              <p>{tasks.filter((task) => task.status === "todo").length}</p>
+            </div>
+          </div>
+          <div className="chart">
+            <h3>Соотвествие срокам</h3>
+            <Bar
+              data={getOverdueTasksData()}
+              options={{
+                indexAxis: "y", // Преобразует гистограмму в горизонтальную
+                responsive: true,
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: "top", // Позиция легенды
+                  },
+                  title: {
+                    display: true,
+                    text: "Overdue Tasks Distribution", // Заголовок графика
+                  },
+                },
+              }}
+            />
+          </div>
         </div>
-        <div className="card">
-          <h3>Completed</h3>
-          <p>{tasks.filter((task) => task.status === "completed").length}</p>
-        </div>
-        <div className="card">
-          <h3>In Progress</h3>
-          <p>{tasks.filter((task) => task.status === "in progress").length}</p>
-        </div>
-        <div className="card">
-          <h3>To Do</h3>
-          <p>{tasks.filter((task) => task.status === "todo").length}</p>
+        <div className="chart">
+          <h3>Приоритет</h3>
+          <Bar data={getPriorityData()} />
         </div>
       </div>
 
       <div className="charts">
-        <div className="chart">
-          <h3>Task Status Distribution</h3>
-          <Doughnut data={getStatusData()} />
-        </div>
-        <div className="chart">
-          <h3>Tasks by Priority</h3>
-          <Bar data={getPriorityData()} />
-        </div>
-        <div className="chart">
-          <h3>Tasks by User</h3>
+        <div className="chart chart-by-user">
+          <h3>Назначенные участникам</h3>
           <Bar data={getTasksByUserData()} />
         </div>
         <div className="chart">
-          <h3>Overdue Tasks</h3>
-          <Doughnut data={getOverdueTasksData()} />
+          <h3>Статус</h3>
+          <Doughnut data={getStatusData()} />
         </div>
       </div>
     </div>

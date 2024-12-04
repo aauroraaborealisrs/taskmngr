@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
 import "../styles/CreateTaskModal.css";
 
 interface EditTaskModalProps {
@@ -32,7 +33,6 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isEditMode, setIsEditMode] = useState(false); 
 
-  
   useEffect(() => {
     const fetchTeamMembers = async () => {
       const rawToken = localStorage.getItem("token");
@@ -100,7 +100,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   return (
     <div className="modal">
       <div className="modal-content">
-        <h2>{isEditMode ? "Edit Task" : "View Task"}</h2>
+        <h2>{isEditMode ? "Редактирование задачи" : ""}</h2>
         {isEditMode ? (
           <>
             {/* Режим редактирования */}
@@ -119,21 +119,21 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               onChange={handleTaskChange}
             ></textarea>
             <select name="priority" value={updatedTask.priority} onChange={handleTaskChange}>
-              <option value="low">Low</option>
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
+              <option value="low">Низкий</option>
+              <option value="normal">Нормальный</option>
+              <option value="high">Высокий</option>
             </select>
             <select name="status" value={updatedTask.status} onChange={handleTaskChange}>
-              <option value="todo">To Do</option>
-              <option value="in progress">In Progress</option>
-              <option value="completed">Completed</option>
+              <option value="todo">Выполнить</option>
+              <option value="in progress">В процессе</option>
+              <option value="completed">Выполнено</option>
             </select>
             <select
               name="assigned_to"
               value={updatedTask.assigned_to || ""}
               onChange={handleTaskChange}
             >
-              <option value="">Unassigned</option>
+              <option value="">Никому не назначено</option>
               {teamMembers.map((member) => (
                 <option key={member.id} value={member.id}>
                   {member.username}
@@ -146,38 +146,45 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               value={updatedTask.due_date || ""}
               onChange={handleTaskChange}
             />
-            <button onClick={saveTask}>Save</button>
-            <button onClick={() => setIsEditMode(false)}>Cancel Edit</button>
+            <button onClick={saveTask}>Сохранить</button>
+            <button onClick={() => setIsEditMode(false)}>Отменить редактирование</button>
           </>
         ) : (
           <>
             {/* Режим просмотра */}
             <p>
-              <strong>Title:</strong> {updatedTask.title}
+              <strong>Название:</strong> {updatedTask.title}
             </p>
             <p>
-              <strong>Description:</strong> {updatedTask.description || "No description"}
+              <strong>Описание:</strong>
+              {updatedTask.description ? (
+                <div>
+                  <ReactMarkdown>{updatedTask.description}</ReactMarkdown>
+                </div>
+              ) : (
+                " нет описания"
+              )}
             </p>
             <p>
-              <strong>Priority:</strong> {updatedTask.priority}
+              <strong>Приоритет:</strong> {updatedTask.priority}
             </p>
             <p>
-              <strong>Status:</strong> {updatedTask.status}
+              <strong>Статус:</strong> {updatedTask.status}
             </p>
             <p>
-              <strong>Assigned To:</strong>{" "}
+              <strong>Назначено:</strong>{" "}
               {updatedTask.assigned_to
                 ? teamMembers.find((member) => member.id === updatedTask.assigned_to)?.username ||
                   "Unknown"
-                : "Unassigned"}
+                : "Никому не назначено"}
             </p>
             <p>
-              <strong>Due Date:</strong> {updatedTask.due_date || "No due date"}
+              <strong>Сделать до:</strong> {updatedTask.due_date || "Не указано"}
             </p>
-            <button onClick={() => setIsEditMode(true)}>Edit</button>
+            <button onClick={() => setIsEditMode(true)}>Редактировать</button>
           </>
         )}
-        <button onClick={onClose}>Close</button>
+        <button onClick={onClose}>Закрыть</button>
       </div>
     </div>
   );

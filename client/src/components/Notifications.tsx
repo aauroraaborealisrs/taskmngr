@@ -62,7 +62,7 @@ const Notifications: React.FC = () => {
             ...tasks.map((task): TaskAssignedData => ({
               taskId: task.id,
               title: task.title,
-              message: "You were assigned this task.",
+              message: "Вам было назначено задание:",
               source: "fetch",
             })),
           ]);
@@ -100,10 +100,12 @@ const Notifications: React.FC = () => {
 
   return (
     <div>
-      <h2>Notifications</h2>
+      <h2>Уведомления</h2>
       {sortedNotifications.length === 0 ? (
         <p>No new notifications.</p>
       ) : (
+        <>
+        <h3>Вам были назначены следующие задания: </h3>
         <ul>
           {sortedNotifications.map((notif) => (
             <li
@@ -112,10 +114,11 @@ const Notifications: React.FC = () => {
                 color: notif.source === "websocket" ? "red" : "black",
               }}
             >
-              <strong>{notif.title}</strong>: {notif.message}
+              {notif.title}
             </li>
           ))}
         </ul>
+        </>
       )}
     </div>
   );

@@ -12,7 +12,7 @@ const registerSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
   password: z
     .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
+    .min(1, { message: "Password must be at least 6 characters" }),
 });
 
 type RegisterFormInputs = z.infer<typeof registerSchema>;
@@ -22,12 +22,13 @@ const saveToLocalStorage = (key: string, value: object) => {
 };
 
 const Register: React.FC = () => {
-  const navigate = useNavigate(); // Навигация с помощью React Router
+  const navigate = useNavigate();
 
   const {
     register,
     handleSubmit,
     formState: { errors },
+    trigger, // добавлено для валидации
   } = useForm<RegisterFormInputs>({
     resolver: zodResolver(registerSchema),
   });
@@ -54,7 +55,7 @@ const Register: React.FC = () => {
         const result = await response.json();
         saveToLocalStorage("token", result.token);
         saveToLocalStorage("user", result.user);
-        alert("Registration successful!");
+        navigate("/");
       } else {
         const error = await response.json();
         alert(`Registration failed: ${error.message}`);
@@ -66,7 +67,8 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div className="register-container">
+    <div className="full-container">
+      <div className="register-container">
       <h1 className="register-title">Register</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="form-group">
@@ -76,8 +78,10 @@ const Register: React.FC = () => {
           <input
             id="firstName"
             type="text"
-            {...register("firstName")}
-            className="form-input"
+            {...register("firstName", {
+              onChange: () => trigger("firstName"), // Вызываем валидацию на изменение
+            })}
+            className={`form-input ${errors.firstName ? "input-error" : ""}`}
           />
           {errors.firstName && (
             <p className="error-message">{errors.firstName.message}</p>
@@ -90,8 +94,13 @@ const Register: React.FC = () => {
           <input
             id="lastName"
             type="text"
-            {...register("lastName")}
-            className="form-input"
+            // className="form-input"
+            // {...register("lastName")}
+            // onChange={() => trigger("lastName")}
+            {...register("lastName", {
+              onChange: () => trigger("lastName"), // Вызываем валидацию на изменение
+            })}
+            className={`form-input ${errors.lastName ? "input-error" : ""}`}
           />
           {errors.lastName && (
             <p className="error-message">{errors.lastName.message}</p>
@@ -104,8 +113,14 @@ const Register: React.FC = () => {
           <input
             id="username"
             type="text"
-            {...register("username")}
-            className="form-input"
+            // {...register("username")}
+            // className="form-input"
+            // onChange={() => trigger("username")}
+            {...register("username", {
+              onChange: () => trigger("username"), // Вызываем валидацию на изменение
+            })}
+            className={`form-input ${errors.username ? "input-error" : ""}`}
+            
           />
           {errors.username && (
             <p className="error-message">{errors.username.message}</p>
@@ -119,8 +134,13 @@ const Register: React.FC = () => {
           <input
             id="email"
             type="email"
-            {...register("email")}
-            className="form-input"
+            // {...register("email")}
+            // className="form-input"
+            // onChange={() => trigger("email")}
+            {...register("email", {
+              onChange: () => trigger("email"), // Вызываем валидацию на изменение
+            })}
+            className={`form-input ${errors.email ? "input-error" : ""}`}
           />
           {errors.email && (
             <p className="error-message">{errors.email.message}</p>
@@ -133,8 +153,14 @@ const Register: React.FC = () => {
           <input
             id="password"
             type="password"
-            {...register("password")}
-            className="form-input"
+            // {...register("password")}
+            // className="form-input"
+            // onChange={() => trigger("password")}
+            {...register("password", {
+              onChange: () => trigger("password"), // Вызываем валидацию на изменение
+            })}
+            className={`form-input ${errors.password ? "input-error" : ""}`}
+            
           />
           {errors.password && (
             <p className="error-message">{errors.password.message}</p>
@@ -144,6 +170,7 @@ const Register: React.FC = () => {
           Register
         </button>
       </form>
+      </div>
     </div>
   );
 };

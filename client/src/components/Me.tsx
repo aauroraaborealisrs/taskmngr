@@ -98,11 +98,11 @@ const Me: React.FC = () => {
 
   return (
     <div className="me-container">
-      <h1 className="me-title">Update Your Profile</h1>
+      <h1 className="me-title">Изменить аккаунт</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="me-form">
         <div className="form-group">
           <label htmlFor="username" className="form-label">
-            Username
+            Имя пользователя
           </label>
           <input
             id="username"
@@ -116,7 +116,7 @@ const Me: React.FC = () => {
         </div>
         <div className="form-group">
           <label htmlFor="email" className="form-label">
-            Email
+            Электронный адрес
           </label>
           <input
             id="email"
@@ -130,7 +130,7 @@ const Me: React.FC = () => {
         </div>
         <div className="form-group">
           <label htmlFor="first_name" className="form-label">
-            First Name
+            Имя
           </label>
           <input
             id="first_name"
@@ -141,7 +141,7 @@ const Me: React.FC = () => {
         </div>
         <div className="form-group">
           <label htmlFor="last_name" className="form-label">
-            Last Name
+            Фамилия
           </label>
           <input
             id="last_name"
@@ -152,7 +152,7 @@ const Me: React.FC = () => {
         </div>
         <div className="form-group">
           <label htmlFor="password" className="form-label">
-            New Password (optional)
+            Новый пароль
           </label>
           <input
             id="password"
@@ -162,7 +162,7 @@ const Me: React.FC = () => {
           />
         </div>
         <button type="submit" className="submit-button">
-          Save Changes
+          Сохранить изменения
         </button>
       </form>
     </div>

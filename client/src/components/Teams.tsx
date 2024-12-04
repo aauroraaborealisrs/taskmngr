@@ -47,21 +47,21 @@ const Teams: React.FC = () => {
 
   return (
     <div className="teams-container">
-      <h1 className="teams-title">Teams</h1>
+      <h1 className="teams-title">Команды</h1>
 
       {error && <p className="error-message">{error}</p>}
 
       <div className="your-teams">
-        <h2>Your Teams</h2>
+        <h2>Ваши команды</h2>
         {teams.length === 0 ? (
-          <p>You are not a member of any teams yet.</p>
+          <p>Вы ещё не состоите ни в какой команде.</p>
         ) : (
           <ul className="teams-list">
             {teams.map((team) => (
               <li key={team.team_id} className="team-item">
                 <div className="team-details column">
                   <span className="team-name">{team.team_name}</span>
-                  <span className="team-role">Role: {team.user_role}</span>
+                  <span className="team-role">Роль: {team.user_role}</span>
                 </div>
               </li>
             ))}
