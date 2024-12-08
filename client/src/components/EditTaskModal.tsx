@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import "../styles/CreateTaskModal.css";
+import ReactMde from "react-mde";
+import "react-mde/lib/styles/css/react-mde-all.css";
 
 interface EditTaskModalProps {
   teamId: string;
   taskId: number;
   onClose: () => void;
-  onTaskUpdated: () => void; 
+  onTaskUpdated: () => void;
   taskData: {
     title: string;
     description: string;
@@ -29,9 +31,9 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   onTaskUpdated,
   taskData,
 }) => {
-  const [updatedTask, setUpdatedTask] = useState(taskData); 
+  const [updatedTask, setUpdatedTask] = useState(taskData);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [isEditMode, setIsEditMode] = useState(false); 
+  const [isEditMode, setIsEditMode] = useState(false);
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
@@ -39,12 +41,15 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
       const token = rawToken?.replace(/^"|"$/g, "");
 
       try {
-        const response = await fetch(`http://localhost:5000/team/${teamId}/members`, {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `http://localhost:5000/team/${teamId}/members`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -64,31 +69,42 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     fetchTeamMembers();
   }, [teamId]);
 
-  const handleTaskChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleTaskChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
     setUpdatedTask({ ...updatedTask, [name]: value });
   };
 
+  const handleMarkdownChange = (value: string) => {
+    setUpdatedTask({ ...updatedTask, description: value });
+  };
+
   const saveTask = async () => {
     const rawToken = localStorage.getItem("token");
-    const token = rawToken?.replace(/^"|"$/g, ""); 
+    const token = rawToken?.replace(/^"|"$/g, "");
 
     try {
-      const response = await fetch(`http://localhost:5000/tasks/${teamId}/tasks/${taskId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ...updatedTask,
-          assigned_to: updatedTask.assigned_to || null, 
-        }),
-      });
+      const response = await fetch(
+        `http://localhost:5000/tasks/${teamId}/tasks/${taskId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            ...updatedTask,
+            assigned_to: updatedTask.assigned_to || null,
+          }),
+        }
+      );
 
       if (response.ok) {
-        onTaskUpdated(); 
-        onClose(); 
+        onTaskUpdated();
+        onClose();
       } else {
         throw new Error("Failed to update task");
       }
@@ -99,10 +115,49 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
 
   return (
     <div className="modal">
-      <div className="modal-content">
-        <h2>{isEditMode ? "Редактирование задачи" : ""}</h2>
+      <div
+        className={`modal-content ${isEditMode ? "edit-mode" : "watch-mode"}`}
+      >
+        <div className="header-modal">
+          <h2>{isEditMode ? "Редактирование задачи" : "Просмотр задачи"}</h2>
+          <div className="btns-cont">
+            {!isEditMode ? (
+              <button
+                onClick={() => setIsEditMode(true)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <img src="/edit.svg" alt="Edit" className="edit-btn" />
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsEditMode(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                }}
+              >
+                <img
+                  src="/cancel-edit.svg"
+                  alt="Cancel Edit"
+                  className="edit-btn"
+                />
+              </button>
+            )}
+            <button onClick={onClose} className="close-btn">
+              <img src="/close.svg" alt="Close" className="close-img" />
+            </button>
+          </div>
+        </div>
+
         {isEditMode ? (
           <>
+            <strong>Название:</strong>
+
             {/* Режим редактирования */}
             <input
               type="text"
@@ -112,22 +167,38 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               onChange={handleTaskChange}
               required
             />
-            <textarea
-              name="description"
-              placeholder="Description"
+            <strong>Описание:</strong>
+            <ReactMde
               value={updatedTask.description || ""}
+              onChange={handleMarkdownChange}
+              generateMarkdownPreview={(markdown) =>
+                Promise.resolve(<ReactMarkdown>{markdown}</ReactMarkdown>)
+              }
+            />
+            <strong>Приоритет:</strong>
+
+            <select
+              name="priority"
+              value={updatedTask.priority}
               onChange={handleTaskChange}
-            ></textarea>
-            <select name="priority" value={updatedTask.priority} onChange={handleTaskChange}>
+            >
               <option value="low">Низкий</option>
               <option value="normal">Нормальный</option>
               <option value="high">Высокий</option>
             </select>
-            <select name="status" value={updatedTask.status} onChange={handleTaskChange}>
+            <strong>Статус:</strong>
+
+            <select
+              name="status"
+              value={updatedTask.status}
+              onChange={handleTaskChange}
+            >
               <option value="todo">Выполнить</option>
               <option value="in progress">В процессе</option>
               <option value="completed">Выполнено</option>
             </select>
+            <strong>Кому назначено:</strong>
+
             <select
               name="assigned_to"
               value={updatedTask.assigned_to || ""}
@@ -140,6 +211,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 </option>
               ))}
             </select>
+            <strong>Сделать до:</strong>
+
             <input
               type="date"
               name="due_date"
@@ -147,44 +220,56 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               onChange={handleTaskChange}
             />
             <button onClick={saveTask}>Сохранить</button>
-            <button onClick={() => setIsEditMode(false)}>Отменить редактирование</button>
           </>
         ) : (
           <>
             {/* Режим просмотра */}
-            <p>
+            <p className="column">
               <strong>Название:</strong> {updatedTask.title}
             </p>
-            <p>
+            <p className="column">
               <strong>Описание:</strong>
               {updatedTask.description ? (
                 <div>
-                  <ReactMarkdown>{updatedTask.description}</ReactMarkdown>
+                  <ReactMarkdown
+                    children={updatedTask.description}
+                    components={{
+                      p: ({ node, ...props }) => <p {...props} />,
+                      a: ({ node, ...props }) => (
+                        <a
+                          {...props}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        />
+                      ),
+                    }}
+                  />
                 </div>
               ) : (
-                " нет описания"
+                "нет описания"
               )}
             </p>
-            <p>
+
+            <p className="column">
               <strong>Приоритет:</strong> {updatedTask.priority}
             </p>
-            <p>
+            <p className="column">
               <strong>Статус:</strong> {updatedTask.status}
             </p>
-            <p>
+            <p className="column">
               <strong>Назначено:</strong>{" "}
               {updatedTask.assigned_to
-                ? teamMembers.find((member) => member.id === updatedTask.assigned_to)?.username ||
-                  "Unknown"
+                ? teamMembers.find(
+                    (member) => member.id === updatedTask.assigned_to
+                  )?.username || "Unknown"
                 : "Никому не назначено"}
             </p>
-            <p>
-              <strong>Сделать до:</strong> {updatedTask.due_date || "Не указано"}
+            <p className="column">
+              <strong>Сделать до:</strong>{" "}
+              {updatedTask.due_date || "Не указано"}
             </p>
-            <button onClick={() => setIsEditMode(true)}>Редактировать</button>
           </>
         )}
-        <button onClick={onClose}>Закрыть</button>
       </div>
     </div>
   );

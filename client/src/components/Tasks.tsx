@@ -19,6 +19,14 @@ interface Task {
   updated_at: string;
 }
 
+const cleanText = (text:string) => {
+  if (!text) return ''; // Если текст null, undefined или пустой, вернуть пустую строку
+  return text
+    .replace(/[#*]/g, '') // Убирает символы # и *
+    .replace(/\s+/g, ' ') // Убирает лишние пробелы
+    .trim(); // Убирает пробелы в начале и конце строки
+};
+
 const Tasks: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [activeModal, setActiveModal] = useState<"create" | "edit" | null>(
@@ -214,7 +222,7 @@ const Tasks: React.FC = () => {
                   {currentTasks.map((task) => (
                     <tr key={task.id} onClick={() => openEditModal(task)}>
                       <td>{task.title}</td>
-                      <td>{task.description}</td>
+                      <td>{cleanText(task.description)}</td>
                       <td className={`${task.priority.toLowerCase()}`}>
                         {task.priority}
                       </td>
@@ -265,7 +273,7 @@ const Tasks: React.FC = () => {
                   Предыдущая
                 </button>
                 <span>
-                  Page {currentPage} of {totalPages}
+                  Страница {currentPage} из {totalPages}
                 </span>
                 <button
                   disabled={currentPage === totalPages}

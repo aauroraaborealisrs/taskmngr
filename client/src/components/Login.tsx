@@ -6,10 +6,10 @@ import "../styles/Login.css";
 import { useNavigate } from "react-router-dom";
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Invalid email address" }),
+  email: z.string().email({ message: "Неправильный адрес электронной почты" }),
   password: z
     .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
+    .min(6, { message: "Пароль должен содержать минимум 6 символов"  }),
 });
 
 type LoginFormInputs = z.infer<typeof loginSchema>;
@@ -57,12 +57,13 @@ const Login: React.FC = () => {
   };
 
   return (
+    <div className="full-container">
     <div className="login-container">
-      <h1 className="login-title">Login</h1>
+      <h1 className="login-title">Вход</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="form-group">
           <label htmlFor="email" className="form-label">
-            Email
+            Электронная почта
           </label>
           <input
             id="email"
@@ -76,7 +77,7 @@ const Login: React.FC = () => {
         </div>
         <div className="form-group">
           <label htmlFor="password" className="form-label">
-            Password
+            Пароль
           </label>
           <input
             id="password"
@@ -89,9 +90,10 @@ const Login: React.FC = () => {
           )}
         </div>
         <button type="submit" className="submit-button">
-          Login
+          Войти
         </button>
       </form>
+    </div>
     </div>
   );
 };

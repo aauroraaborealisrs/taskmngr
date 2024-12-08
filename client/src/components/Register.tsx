@@ -6,13 +6,13 @@ import "../styles/Register.css";
 import { useNavigate } from "react-router-dom";
 
 const registerSchema = z.object({
-  username: z.string().min(1, { message: "Username is required" }),
-  firstName: z.string().min(1, { message: "First name is required" }),
-  lastName: z.string().min(1, { message: "Last name is required" }),
-  email: z.string().email({ message: "Invalid email address" }),
+  username: z.string().min(1, { message: "Имя пользователя обязательно" }),
+  firstName: z.string().min(1, { message: "Имя обязательно" }),
+  lastName: z.string().min(1, { message: "Фамилия обязательна" }),
+  email: z.string().email({ message: "Неправильный адрес электронной почты" }),
   password: z
     .string()
-    .min(1, { message: "Password must be at least 6 characters" }),
+    .min(6, { message: "Пароль должен содержать минимум 6 символов" }),
 });
 
 type RegisterFormInputs = z.infer<typeof registerSchema>;
@@ -69,11 +69,11 @@ const Register: React.FC = () => {
   return (
     <div className="full-container">
       <div className="register-container">
-      <h1 className="register-title">Register</h1>
+      <h1 className="register-title">Регистрация</h1>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="form-group">
           <label htmlFor="firstName" className="form-label">
-            First Name
+          Имя
           </label>
           <input
             id="firstName"
@@ -89,7 +89,7 @@ const Register: React.FC = () => {
         </div>
         <div className="form-group">
           <label htmlFor="lastName" className="form-label">
-            Last Name
+            Фамилия
           </label>
           <input
             id="lastName"
@@ -108,7 +108,7 @@ const Register: React.FC = () => {
         </div>
         <div className="form-group">
           <label htmlFor="username" className="form-label">
-            Username
+            Имя пользователя
           </label>
           <input
             id="username"
@@ -129,7 +129,7 @@ const Register: React.FC = () => {
 
         <div className="form-group">
           <label htmlFor="email" className="form-label">
-            Email
+          Электронная почта
           </label>
           <input
             id="email"
@@ -148,7 +148,7 @@ const Register: React.FC = () => {
         </div>
         <div className="form-group">
           <label htmlFor="password" className="form-label">
-            Password
+            Пароль
           </label>
           <input
             id="password"
@@ -167,7 +167,7 @@ const Register: React.FC = () => {
           )}
         </div>
         <button type="submit" className="submit-button">
-          Register
+          Зарегестрироваться
         </button>
       </form>
       </div>

@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useNavigate } from "react-router-dom";
 import "../styles/Me.css"; // Стили для страницы
+import Loading from "./Loading";
 
 const updateSchema = z.object({
   username: z.string().min(1, { message: "Username is required" }),
@@ -88,9 +89,7 @@ const Me: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return <p>Loading...</p>;
-  }
+  if (loading) return <Loading/>;
 
   if (error) {
     return <p className="error-message">{error}</p>;

@@ -1,59 +1,74 @@
 import React, { useState, useEffect } from "react";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import "../styles/PomodoroTimer.css";
 
 const PomodoroTimer: React.FC = () => {
-  const [workInterval, setWorkInterval] = useState(25); // Рабочий интервал (в минутах)
-  const [shortBreak, setShortBreak] = useState(5); // Короткий перерыв (в минутах)
-  const [longBreak, setLongBreak] = useState(15); // Длинный перерыв (в минутах)
-  const [timeLeft, setTimeLeft] = useState(workInterval * 60); // Время в секундах
-  const [isRunning, setIsRunning] = useState(false); // Запущен ли таймер
-  const [cycle, setCycle] = useState(1); // Текущий цикл работы/перерыва
-  const [isWorkInterval, setIsWorkInterval] = useState(true); // Рабочий интервал или перерыв
+  const [workInterval, setWorkInterval] = useState(25);
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const savedTime = localStorage.getItem("timeLeft");
+    return savedTime ? parseInt(savedTime, 10) : 25 * 60;
+  });
+  const [isRunning, setIsRunning] = useState(() => {
+    const savedRunning = localStorage.getItem("isRunning");
+    return savedRunning === "true";
+  });
+  const [startTime, setStartTime] = useState<number | null>(() => {
+    const savedStartTime = localStorage.getItem("startTime");
+    return savedStartTime ? parseInt(savedStartTime, 10) : null;
+  });
+
+  let interval: ReturnType<typeof setInterval> | null = null;
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (isRunning) {
-      timer = setInterval(() => {
-        setTimeLeft((prevTime) => {
-          if (prevTime <= 1) {
-            handleIntervalEnd(); // Когда таймер заканчивается
-            return 0;
-          }
-          return prevTime - 1;
-        });
+    if (isRunning && startTime) {
+      interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const remainingTime = Math.max(0, workInterval * 60 - elapsed);
+
+        setTimeLeft(remainingTime);
+        localStorage.setItem("timeLeft", remainingTime.toString());
+
+        if (remainingTime === 0) {
+          clearInterval(interval as NodeJS.Timeout);
+          handleReset();
+        }
       }, 1000);
     }
-    return () => clearInterval(timer); // Очищаем таймер при остановке
-  }, [isRunning]);
 
-  const handleIntervalEnd = () => {
-    setIsRunning(false); // Останавливаем таймер
-    if (isWorkInterval) {
-      // Если завершился рабочий интервал
-      if (cycle % 4 === 0) {
-        setTimeLeft(longBreak * 60); // Длинный перерыв
-      } else {
-        setTimeLeft(shortBreak * 60); // Короткий перерыв
-      }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning, startTime, workInterval]);
+
+  useEffect(() => {
+    localStorage.setItem("timeLeft", timeLeft.toString());
+    localStorage.setItem("isRunning", isRunning.toString());
+    if (startTime) {
+      localStorage.setItem("startTime", startTime.toString());
     } else {
-      // Если завершился перерыв
-      setTimeLeft(workInterval * 60); // Новый рабочий интервал
-      setCycle((prevCycle) => prevCycle + 1); // Увеличиваем цикл
+      localStorage.removeItem("startTime");
     }
-    setIsWorkInterval(!isWorkInterval); // Переключаемся между работой и перерывом
-  };
+  }, [timeLeft, isRunning, startTime]);
 
   const handleStartPause = () => {
-    setIsRunning((prev) => !prev); // Переключаем запуск/пауза
+    if (isRunning) {
+      setIsRunning(false);
+      setStartTime(null);
+      localStorage.setItem("timeLeft", timeLeft.toString());
+    } else {
+      setIsRunning(true);
+      setStartTime(Date.now() - (workInterval * 60 - timeLeft) * 1000);
+      localStorage.setItem("startTime", Date.now().toString());
+    }
   };
 
   const handleReset = () => {
     setIsRunning(false);
     setTimeLeft(workInterval * 60);
-    setCycle(1);
-    setIsWorkInterval(true);
+    setStartTime(null);
+    localStorage.removeItem("timeLeft");
+    localStorage.removeItem("isRunning");
+    localStorage.removeItem("startTime");
   };
 
   const formatTime = (seconds: number) => {
@@ -64,62 +79,35 @@ const PomodoroTimer: React.FC = () => {
       .padStart(2, "0")}`;
   };
 
-  const progress =
-    ((isWorkInterval
-      ? workInterval * 60
-      : cycle % 4 === 0
-      ? longBreak * 60
-      : shortBreak * 60) -
-      timeLeft) /
-    (isWorkInterval
-      ? workInterval * 60
-      : cycle % 4 === 0
-      ? longBreak * 60
-      : shortBreak * 60);
+  const progress = (1 - timeLeft / (workInterval * 60)) * 100;
 
   return (
     <div className="pomodoro-timer">
       <h1>Pomodoro Timer</h1>
       <div className="settings">
         <label>
-          Work Interval:
+          Work Interval (min):
           <input
             type="number"
             value={workInterval}
             onChange={(e) => {
-              setWorkInterval(parseInt(e.target.value, 10) || 25);
-              if (isWorkInterval) setTimeLeft((parseInt(e.target.value, 10) || 25) * 60);
+              const newWorkInterval = parseInt(e.target.value, 10) || 25;
+              setWorkInterval(newWorkInterval);
+              if (!isRunning) {
+                setTimeLeft(newWorkInterval * 60);
+                localStorage.setItem("timeLeft", (newWorkInterval * 60).toString());
+              }
             }}
-          />
-        </label>
-        <label>
-          Short Break:
-          <input
-            type="number"
-            value={shortBreak}
-            onChange={(e) =>
-              setShortBreak(parseInt(e.target.value, 10) || 5)
-            }
-          />
-        </label>
-        <label>
-          Long Break:
-          <input
-            type="number"
-            value={longBreak}
-            onChange={(e) =>
-              setLongBreak(parseInt(e.target.value, 10) || 15)
-            }
           />
         </label>
       </div>
       <div className="progress-container">
         <CircularProgressbar
-          value={progress * 100}
+          value={progress}
           text={formatTime(timeLeft)}
           styles={buildStyles({
             textColor: "#333",
-            pathColor: isWorkInterval ? "#3e98c7" : "#ff6347",
+            pathColor: isRunning ? "#3e98c7" : "#ff6347",
             trailColor: "#d6d6d6",
           })}
         />
@@ -129,10 +117,6 @@ const PomodoroTimer: React.FC = () => {
           {isRunning ? "Pause" : "Start"}
         </button>
         <button onClick={handleReset}>Reset</button>
-      </div>
-      <div className="cycle-info">
-        <p>Current Cycle: {cycle}</p>
-        <p>{cycle % 4 === 0 ? "Long Break After This" : "Short Break"}</p>
       </div>
     </div>
   );

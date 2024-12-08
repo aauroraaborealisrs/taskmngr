@@ -5,7 +5,8 @@ body {
 
 .sidebar {
   width: 250px;
-  height: 100vh;
+  /* height: 100vh; */
+  min-height: 100%;
   background-color: var(--grey);
   color: var(--text);
   display: flex;
@@ -16,10 +17,11 @@ body {
 }
 
 .sidebar-logo {
-  text-align: center;
+  /* text-align: center;
   font-size: 24px;
   font-weight: bold;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2); */
+  color: var(--green);
 }
 
 .sidebar-links {

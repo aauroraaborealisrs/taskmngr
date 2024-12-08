@@ -12,6 +12,7 @@ import {
   Legend,
 } from "chart.js";
 import "../styles/Dashboard.css";
+import Loading from "./Loading";
 
 ChartJS.register(
   CategoryScale,
@@ -166,7 +167,7 @@ const Dashboard: React.FC = () => {
     };
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <Loading/>;
   if (error) return <p>Error: {error}</p>;
 
   return (

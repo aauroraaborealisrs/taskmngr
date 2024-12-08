@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Select from "react-select";
 import "../styles/Navbar.css";
 
@@ -14,6 +14,7 @@ const Navbar: React.FC = () => {
     JSON.parse(localStorage.getItem("selectedTeam") || "null")
   );
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     const fetchTeams = async () => {
@@ -36,7 +37,13 @@ const Navbar: React.FC = () => {
             const defaultTeam = data.teams[0];
             setSelectedTeam(defaultTeam);
             localStorage.setItem("selectedTeam", JSON.stringify(defaultTeam));
-            navigate(`/tasks/${defaultTeam.team_id}`);
+            // navigate(`/tasks/${defaultTeam.team_id}`);
+            const isOnTasksRoute = /^\/tasks\/\d+$/.test(location.pathname); // Проверка, что маршрут соответствует /tasks/число
+            const newRoute = `/tasks/${defaultTeam.team_id}`;
+        
+            if (!isOnTasksRoute) {
+              navigate(newRoute);
+            }
           }
         } else {
           throw new Error("Failed to fetch teams");
@@ -55,7 +62,13 @@ const Navbar: React.FC = () => {
     if (selectedOption) {
       let teamId = selectedOption?.team_id.toString();
       localStorage.setItem("selectedTeamId", teamId);
-      navigate(`/tasks/${selectedOption.team_id}`);
+      // navigate(`/tasks/${selectedOption.team_id}`);
+      const isOnTasksRoute = /^\/tasks\/\d+$/.test(location.pathname); // Проверка, что маршрут соответствует /tasks/число
+      const newRoute = `/tasks/${selectedOption.team_id}`;
+  
+      if (isOnTasksRoute) {
+        navigate(newRoute);
+      }
     }
   };
 
@@ -92,19 +105,19 @@ const Navbar: React.FC = () => {
   return (
     <nav className="sidebar">
       <div className="sidebar-logo">
-        <h2>TaskManager</h2>
+        <h2>Havel</h2>
       </div>
 
       <div className="sidebar-team-select">
         <div className="column custom-select-wrapper">
-          <label htmlFor="team-select">Выберите команду:</label>
+          <label htmlFor="team-select"></label>
           <Select
             options={teams}
             getOptionLabel={(e) => e.team_name}
             getOptionValue={(e) => e.team_id.toString()}
             value={selectedTeam}
             onChange={handleTeamChange}
-            placeholder="Select your team..."
+            placeholder="Выберите команду..."
             styles={customStyles}
           />
         </div>
@@ -135,7 +148,7 @@ const Navbar: React.FC = () => {
       </ul>
 
       <div className="sidebar-actions">
-        <button className="sidebar-logout">Logout</button>
+        <button className="sidebar-logout">Выйти</button>
       </div>
     </nav>
   );

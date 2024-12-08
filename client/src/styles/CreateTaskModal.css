@@ -1,89 +1,181 @@
-/* Фон для затемнения */
 .modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 80vw;
+  width: 100%;
+  min-height: 70vh;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10%);
   }
-  
-  /* Контейнер модального окна */
-  .modal-content {
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    max-width: 500px;
-    width: 100%;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
-    animation: fadeIn 0.3s ease-in-out;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  /* Анимация появления */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10%);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* Заголовок */
-  .modal-content h2 {
-    margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.5em;
-    color: #333;
-    text-align: center;
-  }
-  
-  /* Поля формы */
-  .modal-content input,
-  .modal-content textarea,
-  .modal-content select {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-    box-sizing: border-box;
-  }
-  
-  .modal-content textarea {
-    resize: none;
-    height: 80px;
-  }
-  
-  /* Кнопки */
-  .modal-content button {
-    padding: 10px 20px;
-    margin-top: 10px;
-    margin-right: 10px;
-    font-size: 1em;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .modal-content button:hover {
-    opacity: 0.9;
-  }
-  
-  .modal-content button:first-child {
-    background: #4caf50;
-    color: #fff;
-  }
-  
-  .modal-content button:last-child {
-    background: #f44336;
-    color: #fff;
-  }
-  
+}
+
+/* Заголовок */
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.5em;
+  color: #333;
+  text-align: center;
+}
+
+/* Поля формы */
+.modal-content input,
+.modal-content textarea,
+.modal-content select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+}
+
+.modal-content textarea {
+  resize: none;
+  height: 80px;
+}
+
+/* Кнопки */
+.create-task-btn {
+  padding: 10px 20px;
+  margin-top: 10px;
+  font-size: 1em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: var(--green);
+  color: white;
+  margin-top: auto
+}
+
+.create-task-btn:hover {
+  background-color: var(--green-l);
+}
+
+.close-btn {
+  font-size: 1.5em;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: transparent;
+  margin-top: -10px;
+}
+
+.btns-cont img {
+  width: 15px;
+  height: 15px;
+}
+
+.edit-btn {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+.mde-header .mde-tabs button {
+  color: black;
+  border-radius: 5px;
+}
+
+.mde-textarea-wrapper textarea.mde-text {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+}
+
+.header-modal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-cont {
+  display: flex;
+  gap: 2%;
+  justify-content: space-between;
+  height: calc(70vh - 100px);
+}
+
+.left-modal,
+.right-modal {
+  display: flex; /* Используем flexbox для вложенных элементов */
+  flex-direction: column; /* Располагаем элементы вертикально */
+  height: 100%; /* Растягиваем на всю высоту */
+}
+
+.left-modal {
+  height: 100%;
+  flex-grow: 1;
+}
+
+.mde-text {
+  resize: none !important;
+  flex-grow: 1 !important;
+  height: 100%;
+}
+
+.mde-cont > * {
+  margin-top: 10px;
+  flex-grow: 1;
+}
+
+.right-modal {
+  width: 30%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.text-area {
+  flex-grow: 1 !important;
+}
+
+.mde-cont .mde-textarea-wrapper .mde-text {
+  height: calc(70vh - 33vh) !important;
+}
+
+.watch-mode {
+  display: flex;
+  flex-direction: column;
+}
+
+.watch-mode button {
+  width: fit-content;
+  justify-self: end;
+}
+
+.edit-mode .mde-textarea-wrapper .mde-text {
+  height: 90px !important;
+}
+
+.edit-mode .react-mde {
+  margin: 10px 0;
+}

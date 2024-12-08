@@ -17,6 +17,10 @@ code {
   flex-direction: column;
 }
 
+main{
+  min-height: 100vh;
+}
+
 
 :root {
   --grey: #f9f9f9;
