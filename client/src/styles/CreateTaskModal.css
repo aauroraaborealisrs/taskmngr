@@ -179,3 +179,20 @@
 .edit-mode .react-mde {
   margin: 10px 0;
 }
+
+.edit-buttons button{
+  padding: 10px 15px; /* Добавляем комфортные отступы */
+  border: 1px solid #ccc; /* Цвет рамки, как у селекта */
+  border-radius: 5px; /* Закругляем углы, как у селекта */
+  background-color: #fff; /* Белый фон */
+  color: #333; /* Цвет текста */
+  font-size: 16px; /* Размер текста */
+  cursor: pointer;
+  transition: all 0.3s ease; /* Добавляем плавный переход */
+  margin-right: 10px;
+}
+
+.edit-buttons button:first-child{
+  background-color: var(--green); /* Белый фон */
+  color: white;
+}

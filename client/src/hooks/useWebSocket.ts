@@ -4,6 +4,9 @@ import { useEffect } from "react";
 interface TaskAssignedData {
   taskId: number;
   title: string;
+  description: string; // Описание задачи
+  status: string; // Статус задачи
+  priority: string; // Приоритет задачи
   message: string;
 }
 

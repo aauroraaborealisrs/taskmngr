@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from "react";
 import useWebSocket from "../hooks/useWebSocket";
+import "../styles/Notifications.css";
+import { priorityTranslation, statusTranslation } from "../utils/vocabulary";
 
 interface TaskAssignedData {
   taskId: number;
   title: string;
+  description: string; // Описание задачи
+  status: string; // Статус задачи
+  priority: string; // Приоритет задачи
   message: string;
   source: "fetch" | "websocket";
 }
+
 
 interface Task {
   id: number;
@@ -19,6 +25,29 @@ interface Task {
   created_at: string;
   updated_at: string;
 }
+
+const translateStatus = (status: string): string => {
+  return status in statusTranslation
+    ? statusTranslation[status as keyof typeof statusTranslation]
+    : "Неизвестный статус";
+};
+
+const translatePriority = (priority: string): string => {
+  return priority in priorityTranslation
+    ? priorityTranslation[priority as keyof typeof priorityTranslation]
+    : "Неизвестный приоритет";
+};
+
+const sanitizeMarkdown = (text: string): string => {
+  return text
+    .replace(/(^\s*#.*$)/gm, "") // Убирает строки с заголовками Markdown (#)
+    .replace(/^\s*\*.*$/gm, "") // Убирает строки со списками Markdown (*)
+    .replace(/^\s+/gm, "") // Убирает начальные пробелы
+    .replace(/\*\*(.*?)\*\*/g, "$1") // Убирает жирный шрифт (**text**)
+    .replace(/\*(.*?)\*/g, "$1") // Убирает курсив (*text*)
+    .trim(); // Убирает лишние пробелы в начале и конце
+};
+
 
 const Notifications: React.FC = () => {
   const [notifications, setNotifications] = useState<TaskAssignedData[]>([]);
@@ -62,6 +91,9 @@ const Notifications: React.FC = () => {
             ...tasks.map((task): TaskAssignedData => ({
               taskId: task.id,
               title: task.title,
+              description: sanitizeMarkdown(task.description || ""),
+              status: task.status,
+              priority: task.priority,
               message: "Вам было назначено задание:",
               source: "fetch",
             })),
@@ -88,9 +120,18 @@ const Notifications: React.FC = () => {
   useWebSocket(userId, (newTask) => {
     setNotifications((prev: TaskAssignedData[]) => [
       ...prev,
-      { ...newTask, source: "websocket" },
+      { 
+        taskId: newTask.taskId,
+        title: newTask.title,
+        description: newTask.description || "Описание не указано",
+        status: newTask.status || "Статус не указан",
+        priority: newTask.priority || "Приоритет не указан",
+        message: "Вам было назначено задание:",
+        source: "websocket" 
+      },
     ]);
   });
+  
 
   const sortedNotifications = [...notifications].sort((a, b) => {
     if (a.source === "websocket" && b.source === "fetch") return -1;
@@ -99,7 +140,7 @@ const Notifications: React.FC = () => {
   });
 
   return (
-    <div>
+    <div className="notif-cont">
       <h2>Уведомления</h2>
       {sortedNotifications.length === 0 ? (
         <p>No new notifications.</p>
@@ -109,12 +150,20 @@ const Notifications: React.FC = () => {
         <ul>
           {sortedNotifications.map((notif) => (
             <li
+            className="notif-li"
               key={notif.taskId}
               style={{
                 color: notif.source === "websocket" ? "red" : "black",
               }}
             >
-              {notif.title}
+              <div>
+              <strong> {notif.title}</strong>
+              <p> {notif.description}</p>
+              </div>
+              <div className="not-statuses">
+              <p className={`${notif.status.toLowerCase()}`}> {translateStatus(notif.status)}</p>
+              <p className={`${notif.priority.toLowerCase()}`}> {translatePriority(notif.priority)}</p>
+              </div>
             </li>
           ))}
         </ul>

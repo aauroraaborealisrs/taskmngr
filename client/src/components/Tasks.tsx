@@ -5,6 +5,7 @@ import EditTaskModal from "./EditTaskModal";
 import CalendarView from "./CalendarView";
 import CreateTaskModal from "./CreateTaskModal";
 import KanbanBoard from "./KanbanBoard";
+import { priorityTranslation, statusTranslation } from "../utils/vocabulary";
 
 interface Task {
   id: number;
@@ -161,6 +162,19 @@ const Tasks: React.FC = () => {
 
   const totalPages = Math.ceil(tasks.length / tasksPerPage);
 
+  
+const translateStatus = (status: string): string => {
+  return status in statusTranslation
+    ? statusTranslation[status as keyof typeof statusTranslation]
+    : "Неизвестный статус";
+};
+
+const translatePriority = (priority: string): string => {
+  return priority in priorityTranslation
+    ? priorityTranslation[priority as keyof typeof priorityTranslation]
+    : "Неизвестный приоритет";
+};
+
   return (
     <div className="tasks-container">
       <h1>Задания для команды</h1>
@@ -224,10 +238,10 @@ const Tasks: React.FC = () => {
                       <td>{task.title}</td>
                       <td>{cleanText(task.description)}</td>
                       <td className={`${task.priority.toLowerCase()}`}>
-                        {task.priority}
+                        {translatePriority(task.priority)}
                       </td>
                       <td className={`${task.status.toLowerCase()}`}>
-                        {task.status}
+                        {translateStatus(task.status)}
                       </td>
                       <td>
                         <div className="creator-info">

@@ -1,5 +1,6 @@
 .teams-container {
-  margin: 20px;
+  margin-left: 20px;
+  width: calc(100vw - 330px);
 }
 
 li {
@@ -13,6 +14,7 @@ ul {
 
 .teams-list {
   display: flex;
+  flex-direction: column;
 }
 
 .team-details {
@@ -130,4 +132,8 @@ ul {
 
 .css-b62m3t-container{
     margin-top: 5px;
+}
+
+.team-item{
+  margin-top: 5px;
 }

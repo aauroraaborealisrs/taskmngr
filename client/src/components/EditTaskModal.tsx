@@ -34,6 +34,7 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   const [updatedTask, setUpdatedTask] = useState(taskData);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<"write" | "preview">("write"); // Состояние для вкладок
 
   useEffect(() => {
     const fetchTeamMembers = async () => {
@@ -113,6 +114,32 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
     }
   };
 
+  const deleteTask = async () => {
+    const rawToken = localStorage.getItem("token");
+    const token = rawToken?.replace(/^"|"$/g, "");
+
+    try {
+      const response = await fetch(
+        `http://localhost:5000/tasks/${teamId}/tasks/${taskId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (response.ok) {
+        onTaskUpdated();
+        onClose();
+      } else {
+        throw new Error("Failed to delete task");
+      }
+    } catch (err) {
+      console.error("Error deleting task:", err);
+    }
+  };
+
   return (
     <div className="modal">
       <div
@@ -157,8 +184,6 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         {isEditMode ? (
           <>
             <strong>Название:</strong>
-
-            {/* Режим редактирования */}
             <input
               type="text"
               name="title"
@@ -171,12 +196,19 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
             <ReactMde
               value={updatedTask.description || ""}
               onChange={handleMarkdownChange}
+              onTabChange={setSelectedTab} // Добавляем обработчик переключения вкладок
+              selectedTab={selectedTab} // Передаем текущую вкладку
               generateMarkdownPreview={(markdown) =>
                 Promise.resolve(<ReactMarkdown>{markdown}</ReactMarkdown>)
               }
+              l18n={{
+                write: "Редактирование", // Новый текст для вкладки "Write"
+                preview: "Просмотр",     // Новый текст для вкладки "Preview"
+                uploadingImage: "Загрузка изображения...", // Дополнительный текст
+                pasteDropSelect: "Перетащите изображение или вставьте ссылку" // Если требуется
+              }}
             />
             <strong>Приоритет:</strong>
-
             <select
               name="priority"
               value={updatedTask.priority}
@@ -187,7 +219,6 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               <option value="high">Высокий</option>
             </select>
             <strong>Статус:</strong>
-
             <select
               name="status"
               value={updatedTask.status}
@@ -198,7 +229,6 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               <option value="completed">Выполнено</option>
             </select>
             <strong>Кому назначено:</strong>
-
             <select
               name="assigned_to"
               value={updatedTask.assigned_to || ""}
@@ -212,18 +242,21 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               ))}
             </select>
             <strong>Сделать до:</strong>
-
             <input
               type="date"
               name="due_date"
               value={updatedTask.due_date || ""}
               onChange={handleTaskChange}
             />
-            <button onClick={saveTask}>Сохранить</button>
+            <div className="edit-buttons">
+              <button onClick={saveTask}>Сохранить</button>
+              <button onClick={deleteTask} className="delete-btn">
+                Удалить
+              </button>
+            </div>
           </>
         ) : (
           <>
-            {/* Режим просмотра */}
             <p className="column">
               <strong>Название:</strong> {updatedTask.title}
             </p>
@@ -231,25 +264,12 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               <strong>Описание:</strong>
               {updatedTask.description ? (
                 <div>
-                  <ReactMarkdown
-                    children={updatedTask.description}
-                    components={{
-                      p: ({ node, ...props }) => <p {...props} />,
-                      a: ({ node, ...props }) => (
-                        <a
-                          {...props}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        />
-                      ),
-                    }}
-                  />
+                  <ReactMarkdown>{updatedTask.description}</ReactMarkdown>
                 </div>
               ) : (
                 "нет описания"
               )}
             </p>
-
             <p className="column">
               <strong>Приоритет:</strong> {updatedTask.priority}
             </p>

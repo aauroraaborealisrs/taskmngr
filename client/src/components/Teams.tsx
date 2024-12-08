@@ -2,6 +2,18 @@ import React, { useState, useEffect } from "react";
 import CreateTeam from "./CreateTeam";
 import "../styles/Teams.css";
 
+// Объект для перевода ролей
+const teamMemberTranslation = {
+  owner: "создатель",
+  member: "участник",
+  admin: "администратор",
+};
+
+// Вспомогательная функция для перевода роли
+const translateRole = (role: string): string => {
+  return teamMemberTranslation[role as keyof typeof teamMemberTranslation] || "Неизвестная роль";
+};
+
 interface Team {
   team_id: number;
   team_name: string;
@@ -61,7 +73,9 @@ const Teams: React.FC = () => {
               <li key={team.team_id} className="team-item">
                 <div className="team-details column">
                   <span className="team-name">{team.team_name}</span>
-                  <span className="team-role">Роль: {team.user_role}</span>
+                  <span className="team-role">
+                    Роль: {translateRole(team.user_role)}
+                  </span>
                 </div>
               </li>
             ))}
