@@ -137,3 +137,22 @@ ul {
 .team-item{
   margin-top: 5px;
 }
+
+.sel-users{
+  margin-bottom: 20px;
+}
+
+.teams-btn-green{
+  color: white;
+  background-color: var(--green);
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  font-size: 1em;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: var(--green);
+  color: white;
+  margin-top: 100px;
+  margin-left: 1100px;
+}

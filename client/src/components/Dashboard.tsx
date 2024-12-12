@@ -25,6 +25,15 @@ ChartJS.register(
   Legend
 );
 
+const chartOptions = {
+  plugins: {
+    legend: {
+      display: false, 
+    },
+  },
+};
+
+
 const Dashboard: React.FC = () => {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -206,7 +215,7 @@ const Dashboard: React.FC = () => {
                 responsive: true,
                 plugins: {
                   legend: {
-                    display: true,
+                    display: false,
                     position: "top", // Позиция легенды
                   },
                   title: {
@@ -220,14 +229,14 @@ const Dashboard: React.FC = () => {
         </div>
         <div className="chart">
           <h3>Приоритет</h3>
-          <Bar data={getPriorityData()} />
+          <Bar data={getPriorityData()} options={chartOptions}/>
         </div>
       </div>
 
       <div className="charts">
         <div className="chart chart-by-user">
           <h3>Назначенные участникам</h3>
-          <Bar data={getTasksByUserData()} />
+          <Bar data={getTasksByUserData()} options={chartOptions} />
         </div>
         <div className="chart">
           <h3>Статус</h3>

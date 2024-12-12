@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useWebSocket } from "./WebSocketContext";
+import "../styles/Chat.css";
 
 interface Message {
   id: number;
@@ -13,6 +14,9 @@ const TeamChat: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const ws = useWebSocket();
+
+  const user = localStorage.getItem("user");
+  const currentUser = user ? JSON.parse(user) : null;
 
   useEffect(() => {
     const fetchMessages = async () => {
@@ -62,7 +66,6 @@ const TeamChat: React.FC = () => {
   const sendMessage = () => {
     if (!ws || !input.trim() || !teamId) return;
   
-    // Создаем объект сообщения
     const messageData = {
       event: "send_message",
       data: {
@@ -71,44 +74,43 @@ const TeamChat: React.FC = () => {
       },
     };
   
-    // // Добавляем сообщение в состояние (оптимистичное обновление)
-    // setMessages((prev) => [
-    //   ...prev,
-    //   {
-    //     id: Date.now(), // Генерируем временный ID (потом можно заменить)
-    //     content: input,
-    //     sender: "You", // Замените на реальное имя пользователя, если нужно
-    //     created_at: new Date().toISOString(),
-    //   },
-    // ]);
-  
-    // Отправляем сообщение через WebSocket
     ws.send(JSON.stringify(messageData));
   
-    // Очищаем поле ввода
     setInput("");
   };  
 
   return (
-    <div>
-      <h2>Team Chat</h2>
-      <div style={{ maxHeight: "400px", overflowY: "scroll" }}>
-        {messages.map((msg) => (
-          <div key={msg.id}>
-            <strong>{msg.sender}:</strong> {msg.content}
-            <div style={{ fontSize: "0.8em", color: "gray" }}>
-              {new Date(msg.created_at).toLocaleTimeString()}
-            </div>
-          </div>
-        ))}
+    <div className="chat-cont">
+      <h2>Чат команды</h2>
+      <div className="chat-mess">
+        {messages.map((msg) => {
+const isCurrentUser = 
+msg.sender === String(currentUser?.id) || msg.sender === currentUser?.email;
+const messageClass = isCurrentUser ? "m-right" : "m-left";
+
+return (
+<div key={msg.id} className={`message ${messageClass}`}>
+  {!isCurrentUser && <div><strong>{msg.sender}</strong></div>} 
+  <div>{msg.content}</div>
+  <div className="m-date">
+    {new Date(msg.created_at).toLocaleTimeString()}
+  </div>
+</div>
+);
+
+        })}
       </div>
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Type your message"
-      />
-      <button onClick={sendMessage}>Send</button>
+      <div className="send-cont">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Сообщение"
+        />
+        <button onClick={sendMessage}  className="send-btn">
+        <img src="/send.svg" alt="Send" className="send-ing" />
+        </button>
+      </div>
     </div>
   );
 };

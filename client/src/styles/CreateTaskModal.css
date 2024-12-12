@@ -26,11 +26,11 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10%);
+    /* transform: translateY(-10%); */
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    /* transform: translateY(0); */
   }
 }
 
@@ -82,17 +82,15 @@
 }
 
 .close-btn {
-  font-size: 1.5em;
   border: none;
-  border-radius: 4px;
   cursor: pointer;
   background: transparent;
-  margin-top: -10px;
+  margin-top: -5px;
 }
 
 .btns-cont img {
-  width: 15px;
-  height: 15px;
+  width: 17px;
+  height: 17px;
 }
 
 .edit-btn {
@@ -172,12 +170,17 @@
   justify-self: end;
 }
 
-.edit-mode .mde-textarea-wrapper .mde-text {
+/* .edit-mode .mde-textarea-wrapper .mde-text {
   height: 90px !important;
-}
+} */
 
 .edit-mode .react-mde {
   margin: 10px 0;
+}
+
+.edit-buttons{
+  margin-top: 100px;
+  align-self: flex-end;
 }
 
 .edit-buttons button{
@@ -195,4 +198,19 @@
 .edit-buttons button:first-child{
   background-color: var(--green); /* Белый фон */
   color: white;
+}
+
+.description{
+  max-height: 40vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.description h2{
+  margin-bottom: 0;
+  padding-bottom: 0;
 }

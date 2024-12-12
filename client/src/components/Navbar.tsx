@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
   const customStyles = {
     option: (provided: any, state: any) => ({
       ...provided,
-      backgroundColor: state.isSelected ? "#498205" : "#fff",
+      backgroundColor: state.isSelected ? "#4d7358" : "#fff",
       color: state.isSelected ? "#fff" : "#333",
       fontSize: "16px",
       "&:hover": {

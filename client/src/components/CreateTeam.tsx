@@ -63,7 +63,7 @@ const CreateTeam: React.FC = () => {
     return (
       <div ref={innerRef} {...innerProps} className="custom-option">
         <span>
-          {data.username} ({data.email})
+          {data.username}
         </span>
         <button
           type="button"
@@ -73,7 +73,7 @@ const CreateTeam: React.FC = () => {
           }}
           className="add-user-button"
         >
-          Add
+          Добавить
         </button>
       </div>
     );
@@ -124,11 +124,12 @@ const CreateTeam: React.FC = () => {
   };
 
   return (
-    <div className="create-team-container">
-      <h1>Create a New Team</h1>
+    <div className="modal create-team-container">
+      <div className="modal-content">
+      <h1>Создайте новую команду</h1>
       <form onSubmit={handleCreateTeam}>
         <div className="column teams-cont">
-          <label>Team Name</label>
+          <label>Название команды</label>
           <input
             type="text"
             value={teamName}
@@ -138,20 +139,20 @@ const CreateTeam: React.FC = () => {
           />
         </div>
         <div className="teams-cont">
-          <label>Search and Add Users</label>
+          <label>Добавьте участников</label>
           <Select
             options={users}
             getOptionLabel={(e) => e.username}
             getOptionValue={(e) => e.id.toString()}
             components={{ Option: customOption }}
-            placeholder="Search for users..."
+            placeholder="Поиск..."
           />
         </div>
 
         {selectedUsers.length > 0 && (
           <>
             <div className="selected-users">
-              <h2>Selected Members</h2>
+              <h2 className="sel-users">Выбранные участники</h2>
               <ul>
                 {selectedUsers.map((member) => (
                   <li key={member.id}>
@@ -161,18 +162,19 @@ const CreateTeam: React.FC = () => {
                       onClick={() => removeUser(member.id)}
                       className="teams-btn"
                     >
-                      Remove
+                      Удалить
                     </button>
                   </li>
                 ))}
               </ul>
             </div>
-            <button type="submit" disabled={loading} className="teams-btn">
-              {loading ? "Creating..." : "Create Team"}
+            <button type="submit" disabled={loading} className="teams-btn-green">
+              {loading ? "Создание..." : "Создать команду"}
             </button>
           </>
         )}
       </form>
+      </div>
     </div>
   );
 };

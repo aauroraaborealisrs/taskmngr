@@ -14,17 +14,17 @@ interface Task {
   priority: string;
   status: string;
   creator: { name: string; avatar: string };
-  assigned_to: { name: string; avatar: string } | null;
+  assigned_to: { id: number; name: string; avatar: string } | null;
   due_date: string | null;
   created_at: string;
   updated_at: string;
 }
 
-const cleanText = (text:string) => {
-  if (!text) return ''; // Если текст null, undefined или пустой, вернуть пустую строку
+const cleanText = (text: string) => {
+  if (!text) return ""; // Если текст null, undefined или пустой, вернуть пустую строку
   return text
-    .replace(/[#*]/g, '') // Убирает символы # и *
-    .replace(/\s+/g, ' ') // Убирает лишние пробелы
+    .replace(/[#*]/g, "") // Убирает символы # и *
+    .replace(/\s+/g, " ") // Убирает лишние пробелы
     .trim(); // Убирает пробелы в начале и конце строки
 };
 
@@ -78,6 +78,7 @@ const Tasks: React.FC = () => {
           },
           assigned_to: task.assigned_to_name
             ? {
+                id: task.assigned_to,
                 name: `${task.assigned_to_name} ${task.assigned_to_last_name}`,
                 avatar: task.assigned_to_avatar,
               }
@@ -162,18 +163,17 @@ const Tasks: React.FC = () => {
 
   const totalPages = Math.ceil(tasks.length / tasksPerPage);
 
-  
-const translateStatus = (status: string): string => {
-  return status in statusTranslation
-    ? statusTranslation[status as keyof typeof statusTranslation]
-    : "Неизвестный статус";
-};
+  const translateStatus = (status: string): string => {
+    return status in statusTranslation
+      ? statusTranslation[status as keyof typeof statusTranslation]
+      : "Неизвестный статус";
+  };
 
-const translatePriority = (priority: string): string => {
-  return priority in priorityTranslation
-    ? priorityTranslation[priority as keyof typeof priorityTranslation]
-    : "Неизвестный приоритет";
-};
+  const translatePriority = (priority: string): string => {
+    return priority in priorityTranslation
+      ? priorityTranslation[priority as keyof typeof priorityTranslation]
+      : "Неизвестный приоритет";
+  };
 
   return (
     <div className="tasks-container">
@@ -367,7 +367,7 @@ const translatePriority = (priority: string): string => {
             priority: selectedTask.priority,
             status: selectedTask.status,
             assigned_to: selectedTask.assigned_to
-              ? parseInt(selectedTask.assigned_to.name.split(" ")[0])
+              ? selectedTask.assigned_to.id
               : null,
             due_date: selectedTask.due_date,
           }}

@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import "../styles/CreateTaskModal.css";
 import ReactMde from "react-mde";
 import "react-mde/lib/styles/css/react-mde-all.css";
+import { priorityTranslation, statusTranslation } from "../utils/vocabulary";
 
 interface EditTaskModalProps {
   teamId: string;
@@ -22,7 +23,22 @@ interface EditTaskModalProps {
 interface TeamMember {
   id: number;
   username: string;
+  first_name: string;
+  last_name: string;
 }
+
+const translateStatus = (status: string): string => {
+  return status in statusTranslation
+    ? statusTranslation[status as keyof typeof statusTranslation]
+    : "Неизвестный статус";
+};
+
+const translatePriority = (priority: string): string => {
+  return priority in priorityTranslation
+    ? priorityTranslation[priority as keyof typeof priorityTranslation]
+    : "Неизвестный приоритет";
+};
+
 
 const EditTaskModal: React.FC<EditTaskModalProps> = ({
   teamId,
@@ -82,6 +98,17 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
   const handleMarkdownChange = (value: string) => {
     setUpdatedTask({ ...updatedTask, description: value });
   };
+
+  function formatDate(dateString: string | null | undefined): string {
+    if (!dateString) return "Не указано";
+  
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+  
+    return `${day}.${month}.${year}`; // Формат "22.12.2024"
+  }
 
   const saveTask = async () => {
     const rawToken = localStorage.getItem("token");
@@ -182,7 +209,8 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
         </div>
 
         {isEditMode ? (
-          <>
+          <div className="modal-cont">
+            <div className="left-modal">
             <strong>Название:</strong>
             <input
               type="text"
@@ -203,11 +231,13 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
               }
               l18n={{
                 write: "Редактирование", // Новый текст для вкладки "Write"
-                preview: "Просмотр",     // Новый текст для вкладки "Preview"
+                preview: "Просмотр", // Новый текст для вкладки "Preview"
                 uploadingImage: "Загрузка изображения...", // Дополнительный текст
-                pasteDropSelect: "Перетащите изображение или вставьте ссылку" // Если требуется
+                pasteDropSelect: "Перетащите изображение или вставьте ссылку", // Если требуется
               }}
             />
+                        </div>
+                        <div className="right-modal">
             <strong>Приоритет:</strong>
             <select
               name="priority"
@@ -254,41 +284,51 @@ const EditTaskModal: React.FC<EditTaskModalProps> = ({
                 Удалить
               </button>
             </div>
-          </>
+            </div>
+          </div>
         ) : (
-          <>
+                    <div className="modal-cont">
+                    <div className="left-modal">
             <p className="column">
-              <strong>Название:</strong> {updatedTask.title}
+              <strong>Название:</strong> 
+              <h3>{updatedTask.title}</h3>
             </p>
             <p className="column">
               <strong>Описание:</strong>
               {updatedTask.description ? (
-                <div>
+                <div className="description">
                   <ReactMarkdown>{updatedTask.description}</ReactMarkdown>
                 </div>
               ) : (
                 "нет описания"
               )}
             </p>
+            </div>
+            <div className="right-modal">
             <p className="column">
-              <strong>Приоритет:</strong> {updatedTask.priority}
+              <strong>Приоритет:</strong> 
+              <div className={`${updatedTask.priority.toLowerCase()}`}> {translatePriority(updatedTask.priority)}</div>
             </p>
             <p className="column">
-              <strong>Статус:</strong> {updatedTask.status}
+              <strong>Статус:</strong> 
+              <div className={`${updatedTask.status.toLowerCase()}`}> {translateStatus(updatedTask.status)}</div>
+              
             </p>
             <p className="column">
               <strong>Назначено:</strong>{" "}
               {updatedTask.assigned_to
                 ? teamMembers.find(
                     (member) => member.id === updatedTask.assigned_to
-                  )?.username || "Unknown"
+                  )?.username || "Неизвестный пользователь"
                 : "Никому не назначено"}
             </p>
+
             <p className="column">
               <strong>Сделать до:</strong>{" "}
-              {updatedTask.due_date || "Не указано"}
+              {formatDate(updatedTask.due_date)}
             </p>
-          </>
+            </div>
+            </div>
         )}
       </div>
     </div>
